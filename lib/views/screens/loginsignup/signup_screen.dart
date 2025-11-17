@@ -30,40 +30,40 @@ class _SignupScreenState extends State<SignupScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ReuseableImageWidget(img: 'loginimg.png', height: 140, width: 280),
-            SizedBox(height: 56),
+            SizedBox(height: 30),
             ReuseableFields(
               controller: usernameController,
               hintText: 'Username',
             ),
-            SizedBox(height: 13),
+            SizedBox(height: 30),
             ReuseableFields(controller: emailController, hintText: 'Email'),
-            SizedBox(height: 13),
+            SizedBox(height: 30),
             ReuseableFields(
               controller: passwordController,
               hintText: 'Password',
             ),
-            SizedBox(height: 33),
+            SizedBox(height: 30),
 
             authVM.isLoading
                 ? CircularProgressIndicator()
                 : ReuseableButtons(
-                    text: "Register",
-                    callback: () async {
-                      await authVM.signUp(
-                        emailController.text.trim(),
-                        passwordController.text.trim(),
-                        usernameController.text.trim(),
-                        context,
-                      );
+              text: "Register",
+              callback: () async {
+                await authVM.signUp(
+                  emailController.text.trim(),
+                  passwordController.text.trim(),
+                  usernameController.text.trim(),
+                  context,
+                );
 
-                      if (authVM.error != null) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text(authVM.error!)));
-                      }
-                    },
-                  ),
-            SizedBox(height: 5),
+                if (authVM.error != null) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(authVM.error!)));
+                }
+              },
+            ),
+            SizedBox(height: 30),
             ReuseableTextButtons(
               text: 'Already have account?',
               clickabletext: 'Sign in',

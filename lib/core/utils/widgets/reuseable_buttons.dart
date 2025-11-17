@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:taskapp/core/theme/theme.dart';
+import 'package:taskapp/core/utils/constants/app_constants.dart';
 import 'package:taskapp/core/utils/widgets/text_widget.dart';
 
 class ReuseableButtons extends StatelessWidget {
@@ -12,31 +14,26 @@ class ReuseableButtons extends StatelessWidget {
     return GestureDetector(
       onTap: callback,
       child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Container(
             height: 46,
             decoration: BoxDecoration(
-              color: Color(0XFF828282).withOpacity(0.9),
-              borderRadius: BorderRadius.circular(50),
+              color: Colors.deepPurpleAccent.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(12),
               border: null,
               boxShadow: [
                 BoxShadow(
                   color: Color(0XFF828282).withOpacity(0.5), // Shadow color with opacity
                   spreadRadius: 1, // Spread value
                   blurRadius: 2, // Blur value
-                  offset: Offset(0, 2), // Offset (horizontal, vertical)
+                  offset: Offset(2, 2), // Offset (horizontal, vertical)
                 ),
               ],
             ),
             child: Center(
-              child: TextWidget(
-                text: text,
-                txtStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins'
-                ),
+              child: Text(
+                  text,
+                  style: AppTextThemes.darkTextTheme.titleMedium
               ),
             ),
           )

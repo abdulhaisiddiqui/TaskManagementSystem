@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:taskapp/core/utils/constants/app_constants.dart';
 import 'package:taskapp/core/utils/widgets/reuseable_buttons.dart';
 import 'package:taskapp/core/utils/widgets/reuseable_fields.dart';
 import 'package:taskapp/core/utils/widgets/reuseable_image_widget.dart';
@@ -22,42 +23,51 @@ final TextEditingController passwordController = TextEditingController();
 class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
-    final authVM = Provider.of<AuthViewModel>(context, listen: false);
-    final _authRepo = AuthRepository();
+
     return Scaffold(
-      body: Center(
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ReuseableImageWidget(img: 'loginimg.png', height: 140, width: 280),
-            SizedBox(height: 56),
-            ReuseableFields(controller: emailController, hintText: 'Email'),
-            SizedBox(height: 13),
+            SizedBox(height: 120),
+            ReuseableImageWidget(img: 'loginimg.png', height: 180, width: 350),
+            SizedBox(height: 30),
             ReuseableFields(
+              controller: emailController,
+              hintText: 'Email',
+
+            ),
+            SizedBox(height: 30),
+            ReuseableFields(
+
               controller: passwordController,
               hintText: 'Password',
             ),
             SizedBox(height: 33),
-            authVM.isLoading
-                ? CircularProgressIndicator()
-                : ReuseableButtons(
-                    text: "Log in",
-                    callback: () async {
-                      await authVM.login(
-                        email: emailController.text.trim(),
-                        password: passwordController.text.trim(),
-                        context: context,
-                      );
+            Consumer<AuthViewModel>(builder: (context,value,child){
+              return value.isLoading
+                  ? CircularProgressIndicator()
+                  : ReuseableButtons(
+                text: "Log in",
+                callback: () async {
+                  await value.login(
+                    email: emailController.text.trim(),
+                    password: passwordController.text.trim(),
+                    context: context,
+                  );
 
-                      if (authVM.error != null) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text(authVM.error!)));
-                      }
-                    },
-                  ),
-            SizedBox(height: 5),
+                  if (value.error != null) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(value.error!)));
+                  }
+                },
+              );
+            }),
+            SizedBox(height: 30),
+
             ReuseableTextButtons(
               text: 'Dont have an account?',
               clickabletext: 'Create account',

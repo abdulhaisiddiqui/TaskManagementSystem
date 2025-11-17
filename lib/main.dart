@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:taskapp/firebase_options.dart';
 import 'package:taskapp/viewmodels/auth_viewmodel.dart';
+import 'package:taskapp/views/screens/bottomnav/bottomnav_screen.dart';
+import 'package:taskapp/views/screens/loginsignup/login_screen.dart';
 import 'package:taskapp/views/screens/splash/splash_screen.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -51,6 +54,24 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Poppins'
       ),
       home: SplashScreen(),
+    );
+  }
+}
+// Yeh check karega ki user logged in hai ya nahi
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return const BottomNavScreen(); // ← Logged in → Bottom Nav
+        } else {
+          return const LoginScreen(); // ← Not logged in → Login
+        }
+      },
     );
   }
 }

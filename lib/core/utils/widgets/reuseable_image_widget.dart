@@ -8,6 +8,7 @@ class ReuseableImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset('assets/appImages/$img',height: height,width: width,);
+    return Image.asset('assets/appImages/$img',height: height,width: width
+      ,fit: BoxFit.cover,);
   }
 }

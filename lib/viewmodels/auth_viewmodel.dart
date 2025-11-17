@@ -9,6 +9,7 @@ import '../core/utils/widgets/text_widget.dart';
 import '../data/repositories/authrepositories/auth_repository.dart';
 import '../data/models/user_model.dart';
 import '../main.dart';
+import '../views/screens/bottomnav/bottomnav_screen.dart';
 import '../views/screens/home/home_screen.dart';
 import '../views/screens/loginsignup/login_screen.dart';
 
@@ -42,6 +43,12 @@ class AuthViewModel extends ChangeNotifier {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => LoginScreen()),
+      );
+      // Login success ke baad
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const BottomNavScreen()),
+            (route) => false,
       );
     }on FirebaseAuthException catch (e) {
       final errorMessage = FirebaseErrorMapper().handleAuthError(e.code);
@@ -98,6 +105,12 @@ class AuthViewModel extends ChangeNotifier {
 
         await _authRepository.logout(context: context);
       }
+      // Login success ke baad
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const BottomNavScreen()),
+            (route) => false,
+      );
     } on FirebaseAuthException catch (e) {
       final errorMessage = FirebaseErrorMapper().handleAuthError(e.code);
           _showSnackBar(context, errorMessage);

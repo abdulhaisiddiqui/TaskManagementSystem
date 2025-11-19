@@ -1,7 +1,9 @@
 // views/widgets/floating_bottom_nav_bar.dart
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
+
+import '../../theme/app_color.dart';
+import '../../theme/app_theme_constants.dart';
 
 class FloatingBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -15,54 +17,54 @@ class FloatingBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Align(
       alignment: Alignment.bottomCenter,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         child: Material(
-          elevation: 20, // ← Floating shadow
-          borderRadius: BorderRadius.circular(30),
+          elevation: 24,
+          borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 8), // 20
           color: Colors.transparent,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 8),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), // Heavy blur
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: Container(
-                height: 70,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                height: 76,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.25), // Glass black
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+                  color: isDark
+                      ? Colors.black.withOpacity(0.4)
+                      : Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 8),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withOpacity(0.15)
+                        : AppColors.primary.withOpacity(0.25),
+                    width: 1.5,
+                  ),
                 ),
                 child: BottomNavigationBar(
                   backgroundColor: Colors.transparent,
-                  selectedItemColor: Colors.teal,
-                  unselectedItemColor: Colors.white70,
                   currentIndex: currentIndex,
-                  type: BottomNavigationBarType.fixed,
-                  showSelectedLabels: true,
-                  showUnselectedLabels: true,
-                  selectedFontSize: 11,
-                  unselectedFontSize: 11,
-                  elevation: 0,
                   onTap: onTap,
-                  items: const [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.home_outlined, size: 26),
-                      activeIcon: Icon(Icons.home, size: 26),
-                      label: 'Home',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.format_list_bulleted_outlined, size: 26),
-                      activeIcon: Icon(Icons.format_list_bulleted, size: 26),
-                      label: 'Tasks',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.person_outline, size: 26),
-                      activeIcon: Icon(Icons.person, size: 26),
-                      label: 'Profile',
-                    ),
+                  type: BottomNavigationBarType.fixed,
+                  elevation: 0,
+                  selectedFontSize: 12,
+                  unselectedFontSize: 11,
+                  selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+                  unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
+
+
+                  selectedItemColor: AppColors.primary,
+                  unselectedItemColor: isDark ? Colors.white70 : Colors.black54,
+
+                  items: [
+                    _navItem(Icons.home_outlined, Icons.home_rounded, 'Home'),
+                    _navItem(Icons.format_list_bulleted_outlined, Icons.format_list_bulleted_rounded, 'Tasks'),
+                    _navItem(Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
                   ],
                 ),
               ),
@@ -70,6 +72,20 @@ class FloatingBottomNavBar extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  BottomNavigationBarItem _navItem(IconData outline, IconData filled, String label) {
+    return BottomNavigationBarItem(
+      icon: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Icon(outline, size: 28),
+      ),
+      activeIcon: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Icon(filled, size: 30),
+      ),
+      label: label,
     );
   }
 }

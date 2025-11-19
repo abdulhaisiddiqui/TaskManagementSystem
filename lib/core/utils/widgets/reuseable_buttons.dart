@@ -19,7 +19,7 @@ class ReuseableButtons extends StatelessWidget {
             height: 46,
             decoration: BoxDecoration(
               color: Colors.deepPurpleAccent.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
               border: null,
               boxShadow: [
                 BoxShadow(

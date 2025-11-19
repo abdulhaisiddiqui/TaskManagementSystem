@@ -6,10 +6,10 @@ class AppColors {
   static const Color onPrimary = Color(0xFF000000); 
 
   
-  static const Color backgroundLight = Color(0xFFFFFFFF); 
+  static const Color backgroundLight = Color(0xFFFFFFFF);
   static const Color surfaceLight = Color(0xFFF5F5F5); 
   static const Color onBackgroundLight = Color(0xFF000000); 
-  static const Color onSurfaceLight = Color(0xFF000000); 
+  static const Color onSurfaceLight = Color(0xFF000000);
   static const Color textSecondaryLight = Color(0xFF757575); 
 
   

@@ -44,12 +44,7 @@ class AuthViewModel extends ChangeNotifier {
         context,
         MaterialPageRoute(builder: (_) => LoginScreen()),
       );
-      // Login success ke baad
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const BottomNavScreen()),
-            (route) => false,
-      );
+
     }on FirebaseAuthException catch (e) {
       final errorMessage = FirebaseErrorMapper().handleAuthError(e.code);
       _showSnackBar(context, errorMessage);
@@ -100,17 +95,18 @@ class AuthViewModel extends ChangeNotifier {
                 context,
                 MaterialPageRoute(builder: (_) => HomeScreen()),
               );
+        // Login success ke baad
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const BottomNavScreen()),
+              (route) => false,
+        );
       } else {
         _showSnackBar(context, "Please verify your email first.");
 
         await _authRepository.logout(context: context);
       }
-      // Login success ke baad
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const BottomNavScreen()),
-            (route) => false,
-      );
+
     } on FirebaseAuthException catch (e) {
       final errorMessage = FirebaseErrorMapper().handleAuthError(e.code);
           _showSnackBar(context, errorMessage);

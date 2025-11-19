@@ -2,9 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:taskapp/views/screens/home/home_screen.dart';
+import 'package:taskapp/views/screens/splash/splash_screen.dart';
+import 'package:taskapp/views/screens/taskscreens/create_task_screen.dart';
 
 import '../../../core/utils/widgets/custom_bottom_navbar.dart';
-import '../../profile_screen.dart';
+import 'package:taskapp/views/screens/profile/profile_screen.dart';
 import '../../task_screen.dart';
 
 class BottomNavScreen extends StatefulWidget {
@@ -19,14 +21,13 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
   final List<Widget> pages = [
     const HomeScreen(),
-    const TasksScreen(),
+    const CreateTaskScreen(),
     const ProfileScreen(),
   ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true, // ← ZAROORI: Peeche wali screen dikhe
+      extendBody: true,
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [

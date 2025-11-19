@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taskapp/core/theme/app_theme_constants.dart';
 import 'package:taskapp/core/utils/constants/app_constants.dart';
 
 import '../../theme/app_color.dart';
@@ -21,7 +22,7 @@ class ReuseableFields extends StatelessWidget {
       child: Container(
         height: 46,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
           color: AppColors.gray100,
         ),
         child: TextFormField(
@@ -33,11 +34,11 @@ class ReuseableFields extends StatelessWidget {
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             hintStyle: AppTextThemes.lightTextTheme.bodyMedium,
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
               borderSide: BorderSide(color: AppConstants.textColor.withOpacity(0.5)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
               borderSide: BorderSide(color: AppConstants.textColor, width: 1.5),
             ),
           ),

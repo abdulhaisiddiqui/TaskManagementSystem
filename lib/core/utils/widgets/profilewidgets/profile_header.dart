@@ -58,7 +58,7 @@ class ProfileHeader extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
 
@@ -76,29 +76,29 @@ class ProfileHeader extends StatelessWidget {
                   const SizedBox(height: 16),
 
 
-                  SizedBox(
-                    height: 48,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ChangeNotifierProvider.value(
-                              value: vm,
-                              child: const EditProfileScreen(),
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.edit_rounded, size: 20),
-                      label: const Text("Edit profile"),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
-                        ),
-                      ),
-                    ),
-                  ),
+                  // SizedBox(
+                  //   height: 48,
+                  //   child: ElevatedButton.icon(
+                  //     onPressed: () {
+                  //       Navigator.push(
+                  //         context,
+                  //         MaterialPageRoute(
+                  //           builder: (_) => ChangeNotifierProvider.value(
+                  //             value: vm,
+                  //             child: const EditProfileScreen(),
+                  //           ),
+                  //         ),
+                  //       );
+                  //     },
+                  //     icon: const Icon(Icons.edit_rounded, size: 20),
+                  //     label: const Text("Edit profile"),
+                  //     style: ElevatedButton.styleFrom(
+                  //       shape: RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

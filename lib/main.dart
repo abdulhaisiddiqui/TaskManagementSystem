@@ -45,7 +45,7 @@ void main() async {
     },
   );
 
-  // Create Notification Channels (MUST for Android 13+)
+
   await _createNotificationChannels();
 
   // Request Permissions
@@ -89,7 +89,7 @@ void main() async {
     ),
   );
 }
-// Create Channels
+
 Future<void> _createNotificationChannels() async {
   final androidPlugin = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
 
@@ -111,26 +111,26 @@ Future<void> _createNotificationChannels() async {
   await androidPlugin?.createNotificationChannel(welcomeChannel);
 }
 
-// Request Exact Alarm + Notification Permission
+
 Future<void> _requestPermissions() async {
-  // Android 13+ Notification Permission
+
   if (await Permission.notification.isDenied) {
     await Permission.notification.request();
   }
 
-  // Exact Alarm Permission (Android 12+)
+
   final androidImpl = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
   if (androidImpl != null && !(await androidImpl.areNotificationsEnabled() ?? true)) {
     await androidImpl.requestNotificationsPermission();
   }
 
-  // Request Exact Alarm Permission
+
   if (!(await androidImpl?.canScheduleExactNotifications() ?? true)) {
     await androidImpl?.requestExactAlarmsPermission();
   }
 }
 
-// ----------------- MyApp -----------------
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -144,7 +144,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ----------------- Auth Wrapper -----------------
+
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 

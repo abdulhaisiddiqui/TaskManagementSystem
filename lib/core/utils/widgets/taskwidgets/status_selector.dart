@@ -12,19 +12,19 @@ class StatusSelector extends StatelessWidget {
   final Map<String, Color> statusColors = {
     'To Do': AppColors.gray500.withOpacity(0.2),
     'In Progress': AppColors.amber.withOpacity(0.25),
-    'Completed': AppColors.success.withOpacity(0.22),
+    // 'Completed': AppColors.success.withOpacity(0.22),
   };
 
   final Map<String, Color> selectedColors = {
     'To Do': AppColors.gray600,
     'In Progress': AppColors.amber,
-    'Completed': AppColors.success,
+    // 'Completed': AppColors.success,
   };
 
   final Map<String, IconData> statusIcons = {
     'To Do': Icons.radio_button_unchecked_rounded,
     'In Progress': Icons.sync_rounded,
-    'Completed': Icons.check_circle_rounded,
+    // 'Completed': Icons.check_circle_rounded,
   };
 
   @override
@@ -48,7 +48,7 @@ class StatusSelector extends StatelessWidget {
             Wrap(
               spacing: 14,
               runSpacing: 12,
-              children: ['To Do', 'In Progress', 'Completed'].map((status) {
+              children: ['To Do', 'In Progress'].map((status) {
                 final bool isSelected = vm.task.status == status;
 
                 return FilterChip(

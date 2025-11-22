@@ -1,22 +1,21 @@
-import 'package:flutter/cupertino.dart';
+// lib/core/utils/widgets/homewidgets/home_build_task_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:taskapp/data/models/task_model.dart';
 import 'package:taskapp/data/repositories/taskrepository/task_repository.dart';
 import 'package:taskapp/viewmodels/task_viewmodel.dart';
 import 'package:taskapp/views/screens/taskscreens/edit_task_screen.dart';
+
 class HomeBuildTaskCard extends StatefulWidget {
-  final String title;
-  final String time;
-  final String category;
-  final String status;
-  final Color statusColor;
-  const HomeBuildTaskCard({super.key,
-    required this.title,
-    required this.time,
-    required this.category,
-    required this.status,
-    required this.statusColor});
+  final TaskModel task;
+  final String uid;
+
+  const HomeBuildTaskCard({
+    super.key,
+    required this.task,
+    required this.uid,
+  });
 
   @override
   State<HomeBuildTaskCard> createState() => _HomeBuildTaskCardState();
@@ -61,15 +60,16 @@ class _HomeBuildTaskCardState extends State<HomeBuildTaskCard> {
   }
 
 
+
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Color(0XFFB5B5B5).withOpacity(0.4),
-        borderRadius: BorderRadius.circular(35),
-        // border: Border.all(color: Colors.grey[300]!),
+        color: const Color(0xFFB5B5B5).withOpacity(0.15),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.grey.shade300, width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,29 +88,72 @@ class _HomeBuildTaskCardState extends State<HomeBuildTaskCard> {
             ],
           ),
           const SizedBox(height: 12),
+
+          // Title
+          Text(
+            widget.task.title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+          ),
+          const SizedBox(height: 8),
+
+          // Category & Status
+          Row(
+            children: [
+              Text("Category: ${widget.task.category}", style: const TextStyle(fontSize: 13, color: Colors.black54)),
+              const SizedBox(width: 20),
+              Text(
+                "Status: ${widget.task.status}",
+                style: TextStyle(fontSize: 13, color: _statusColor, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Action Buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _actionButton('Edit', Colors.orange),
-              _actionButton('Complete', Colors.green),
-              _actionButton('Delete', Colors.red),
+              _buildActionButton(
+                label: "Edit",
+                color: Colors.orange,
+                onTap: () => _navigateToEdit(),
+              ),
+              _buildActionButton(
+                label: isCompleted ? "Reopen" : "Complete",
+                color: isCompleted ? Colors.grey.shade600 : Colors.green,
+                onTap: _isLoading ? null : () => _toggleCompleteStatus(),
+              ),
+              _buildActionButton(
+                label: "Delete",
+                color: Colors.red,
+                onTap: _isLoading ? null : () => _deleteTask(),
+              ),
             ],
           ),
         ],
       ),
     );
   }
-  Widget _actionButton(String label, Color color) {
+
+  // Reusable Button
+  Widget _buildActionButton({
+    required String label,
+    required Color color,
+    required VoidCallback? onTap,
+  }) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: onTap,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         foregroundColor: Colors.white,
+        elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        minimumSize: const Size(80, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        minimumSize: const Size(90, 40),
       ),
-      child: Text(label, style: const TextStyle(fontSize: 13)),
+      child: _isLoading && onTap != null
+          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+          : Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
     );
   }
 

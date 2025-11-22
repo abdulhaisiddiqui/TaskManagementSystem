@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:taskapp/core/theme/app_color.dart';
@@ -10,6 +12,7 @@ import 'package:taskapp/viewmodels/profile_viewmodel.dart';
 import 'package:taskapp/viewmodels/task_viewmodel.dart';
 import 'package:taskapp/views/screens/loginsignup/login_screen.dart';
 import 'package:taskapp/views/screens/notification/notification_screen.dart';
+import 'package:taskapp/views/screens/taskscreens/create_task_screen.dart';
 
 import '../../../core/utils/widgets/homewidgets/task_filter_bar.dart';
 import '../taskscreens/task_detail_screen.dart';
@@ -25,13 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
   final _notificationRepo = NotificationRepository();
   User? currentUser = FirebaseAuth.instance.currentUser;
 
-
   @override
   void initState() {
     super.initState();
 
     _notificationRepo.setupFirebaseMessagingListener();
-
     _notificationRepo.showWelcomeNotification();
 
     final now = DateTime.now();
@@ -45,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<TaskViewModel>().loadAllTasksForHome();
     });
   }
+
   @override
   Widget build(BuildContext context) {
     if (currentUser == null) {
@@ -58,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-
             Consumer<ProfileViewModel>(
               builder: (context, profileVm, child) {
                 final String? photoUrl = profileVm.user?.photoURL;
@@ -112,12 +113,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
 
-
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: const Color(0XFF828282),
+                color: const Color(0xFF828282),
                 borderRadius: BorderRadius.circular(35),
               ),
               child: StreamBuilder<DocumentSnapshot>(
@@ -346,54 +346,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   );
                 },
-
               ),
             ),
-
-            // ----------------------------- TASKS LIST -----------------------------
-      Expanded(
-        child: StreamBuilder(
-          stream: context.read<TaskViewModel>().getTasks(),
-          builder: (context, snapshot) {
-            print("Tasks snapshot: ${snapshot.data}");
-
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text("No tasks found"));
-            }
-
-            final tasks = snapshot.data!;
-
-            String format(DateTime t) {
-              String hour = t.hour.toString().padLeft(2, '0');
-              String minute = t.minute.toString().padLeft(2, '0');
-              String ampm = t.hour >= 12 ? 'pm' : 'am';
-              return "$hour.$minute $ampm";
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                final task = tasks[index];
-
-                final formattedTime =
-                    "${format(task.startTime)} – ${format(task.endTime)}";
-
-                return HomeBuildTaskCard(
-                  title: task.title,
-                  time: formattedTime,
-                  category: task.category,
-                  status: task.status,
-                  statusColor: task.status == "Completed"
-                      ? Colors.green
-                      : Colors.orange,
-                );
-              },
-            );
-          },
+          ],
         ),
       ),
       floatingActionButton: Padding(
@@ -401,7 +356,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: FloatingActionButton(
           onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen())),
           child: const Icon(Icons.add),
-
         ),
       ),
     );

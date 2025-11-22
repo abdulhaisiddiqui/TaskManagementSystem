@@ -1,18 +1,24 @@
+// lib/data/repositories/taskrepository/task_repository.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/task_model.dart';
 
 class TaskRepository {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // Fetch tasks
   Stream<List<TaskModel>> fetchTasks(String uid) {
-    return FirebaseFirestore.instance
+    return _firestore
         .collection('users')
         .doc(uid)
         .collection('tasks')
         .snapshots()
-        .map((snapshot) =>
-        snapshot.docs.map((doc) => TaskModel.fromMap(doc.data(), doc.id)).toList());
+        .map((snapshot) => snapshot.docs
+        .map((doc) => TaskModel.fromMap(doc.data(), doc.id))
+        .toList());
   }
 
-  
+  // Add new task + update stats
   Future<String> addTask(String uid, TaskModel task) async {
     await _firestore.runTransaction((transaction) async {
       final userRef = _firestore.collection('users').doc(uid);

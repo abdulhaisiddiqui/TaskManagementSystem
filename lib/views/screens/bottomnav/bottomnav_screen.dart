@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:taskapp/views/screens/home/home_screen.dart';
 import 'package:taskapp/views/screens/splash/splash_screen.dart';
 import 'package:taskapp/views/screens/taskscreens/create_task_screen.dart';
+import 'package:taskapp/views/screens/taskscreens/fetch_task_screen.dart';
 
 import '../../../core/utils/widgets/custom_bottom_navbar.dart';
 import 'package:taskapp/views/screens/profile/profile_screen.dart';
@@ -21,7 +22,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
   final List<Widget> pages = [
     const HomeScreen(),
-    const CreateTaskScreen(),
+    const TodaysTasksScreen(),
     const ProfileScreen(),
   ];
   @override

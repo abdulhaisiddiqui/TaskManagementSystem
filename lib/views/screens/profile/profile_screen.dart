@@ -24,7 +24,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
 
-
     Stream<DocumentSnapshot<Map<String, dynamic>>> getUserStream(String uid) {
       return FirebaseFirestore.instance
           .collection('users')
@@ -111,21 +110,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: ElevatedButton(
                           onPressed: () {},
                           child: const Text("Details"),
-
                         ),
-                        const SizedBox(height: 16),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: ElevatedButton(
-                            onPressed: () {},
-                            child: const Text("Details"),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
 
 
             const SizedBox(height: 12),
@@ -140,7 +131,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
              },),
             const SizedBox(height: 50),
           ],
-
         ),
       ),
     );

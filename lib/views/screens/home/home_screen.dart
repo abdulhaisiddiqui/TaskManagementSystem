@@ -314,7 +314,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => TaskDetailScreen(task: task),
+                                builder: (_) => TaskDetailScreen(taskId: task.id!,),
                               ),
                             );
                           },
@@ -334,7 +334,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => TaskDetailScreen(task: task),
+                              builder: (_) => TaskDetailScreen(taskId: task.id!,),
                             ),
                           );
                         },

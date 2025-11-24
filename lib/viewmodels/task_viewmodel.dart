@@ -15,6 +15,7 @@ class TaskViewModel extends ChangeNotifier {
   final TaskRepository _repo = TaskRepository();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final NotificationRepository _notificationRepo = NotificationRepository();
+  TaskModel? taskdetailscreen;
 
   TaskModel _task = TaskModel(
     userId: FirebaseAuth.instance.currentUser?.uid ?? '',
@@ -47,6 +48,25 @@ class TaskViewModel extends ChangeNotifier {
   int get otherCountToday => _allTasksTodayScreen.where((t) => t.category == 'Other').length;
 
 
+  Stream<TaskModel?> listenTask(String taskId) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('tasks')
+        .doc(taskId)
+        .snapshots()
+        .map((doc) {
+      if (!doc.exists) return null;
+
+      final task = TaskModel.fromMap(doc.data()!, doc.id);
+
+      taskdetailscreen = task;
+      notifyListeners();
+      return task;
+    });
+  }
+
+
   List<TaskModel> get filteredTasksTodayScreen2 {
     switch (_selectedTabIndexTodayScreen) {
       case 0:
@@ -63,6 +83,8 @@ class TaskViewModel extends ChangeNotifier {
         return _allTasksTodayScreen;
     }
   }
+
+
 
 
   void loadAllTasksForTodayScreen() {
@@ -178,30 +200,33 @@ class TaskViewModel extends ChangeNotifier {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception("User not logged in");
 
-      final taskRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('tasks');
+
+      final String oldStatus = _task.status;
+
 
       Map<String, dynamic> data = _task.toMap();
       data['startTime'] = Timestamp.fromDate(_task.startTime);
       data['endTime'] = Timestamp.fromDate(_task.endTime);
 
+      bool wasCompletedBefore = oldStatus == "Completed";
+
       if (_task.id == null) {
-        await _repo.addTask(
-          user.uid,
-          _task.copyWith(id: DateTime.now().millisecondsSinceEpoch.toString()),
+
+        final newTask = _task.copyWith(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
         );
+        await _repo.addTask(user.uid, newTask);
+        _task = newTask;
       } else {
-        final oldStatus = task.status;
+
         await _repo.updateTask(
           user.uid,
           _task,
-          oldCompletionStatus: oldStatus == "Completed",
+          oldCompletionStatus: wasCompletedBefore,
         );
       }
 
-      // Schedule task reminder & overdue alert
+
       await _notificationRepo.scheduleTaskReminder(_task);
       await _notificationRepo.scheduleOverdueAlert(_task);
 

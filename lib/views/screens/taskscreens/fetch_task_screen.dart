@@ -314,7 +314,7 @@ class TaskListView extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TaskDetailScreen(task: task),
+                      builder: (_) => TaskDetailScreen(taskId: task.id!,),
                     ),
                   );
                 },
@@ -333,7 +333,7 @@ class TaskListView extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TaskDetailScreen(task: task),
+                      builder: (_) => TaskDetailScreen(taskId: task.id!,),
                     ),
                   );
                 },

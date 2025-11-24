@@ -1,12 +1,14 @@
+// lib/data/models/app_notification_model.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AppNotification {
   final String id;
-  final String type;
+  final String type;           // reminder, overdue, daily_summary, completion
   final String title;
   final String body;
   final DateTime scheduledTime;
-  final bool isRead;
+  final String? taskId;        // ← YE FIELD ADD KAR DO (nullable)
 
   AppNotification({
     required this.id,
@@ -14,18 +16,8 @@ class AppNotification {
     required this.title,
     required this.body,
     required this.scheduledTime,
-    this.isRead = false,
+    this.taskId,
   });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'type': type,
-      'title': title,
-      'body': body,
-      'scheduledTime': scheduledTime,
-      'isRead': isRead,
-    };
-  }
 
   factory AppNotification.fromMap(Map<String, dynamic> map, String docId) {
     return AppNotification(
@@ -34,7 +26,17 @@ class AppNotification {
       title: map['title'] ?? '',
       body: map['body'] ?? '',
       scheduledTime: (map['scheduledTime'] as Timestamp).toDate(),
-      isRead: map['isRead'] ?? false,
+      taskId: map['taskId'],
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'type': type,
+      'title': title,
+      'body': body,
+      'scheduledTime': Timestamp.fromDate(scheduledTime),
+      'taskId': taskId,                 // ← YE ADD KAR DO
+    };
   }
 }

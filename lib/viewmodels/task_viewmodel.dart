@@ -203,7 +203,6 @@ class TaskViewModel extends ChangeNotifier {
 
       final String oldStatus = _task.status;
 
-
       Map<String, dynamic> data = _task.toMap();
       data['startTime'] = Timestamp.fromDate(_task.startTime);
       data['endTime'] = Timestamp.fromDate(_task.endTime);
@@ -226,9 +225,26 @@ class TaskViewModel extends ChangeNotifier {
         );
       }
 
-
+      try {
+        await _notificationRepo.scheduleTaskReminder(_task);
+        await _notificationRepo.scheduleOverdueAlert(_task);
+      } catch (e) {
+        print("Notification scheduling failed: $e");
+      }
       await _notificationRepo.scheduleTaskReminder(_task);
-      await _notificationRepo.scheduleOverdueAlert(_task);
+
+      // Daily Summary (ek baar daily)
+      await _notificationRepo.scheduleDailySummary();
+
+      // Completion Celebration
+      if (_task.status == "Completed") {
+        await _notificationRepo.scheduleCompletionCelebration(_task);
+      }
+
+      // Overdue Alert
+      if (_task.endTime.isBefore(DateTime.now()) && _task.status != "Completed") {
+        await _notificationRepo.scheduleOverdueAlert(_task);
+      }
 
       _isLoading = false;
       notifyListeners();

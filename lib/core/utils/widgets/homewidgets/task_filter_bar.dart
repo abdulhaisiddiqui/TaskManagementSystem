@@ -115,7 +115,7 @@ class _TaskFilterBarState extends State<TaskFilterBar> {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 8),
+        borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 12),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 6))],
       ),
       child: Row(
@@ -130,7 +130,6 @@ class _TaskFilterBarState extends State<TaskFilterBar> {
 
   Expanded _buildChip(String label, IconData icon, TaskSortBy sortBy) {
     final bool isSelected = widget.selectedSort == sortBy;
-
     return Expanded(
       child: GestureDetector(
         onTap: () {

@@ -1,110 +1,147 @@
+// lib/data/repositories/notificationrepository/notification_repository.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import '../../../main.dart';
-import '../../models/app_notification_model.dart';
-import '../../models/task_model.dart';
+import 'package:taskapp/main.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import '../../models/app_notification_model.dart';
+import '../../models/task_model.dart';
 
-class NotificationRepository extends ChangeNotifier {
-  final FlutterLocalNotificationsPlugin _localNotifications =
-      flutterLocalNotificationsPlugin;
+class NotificationRepository {
+  final FlutterLocalNotificationsPlugin _plugin = flutterLocalNotificationsPlugin;
 
-  NotificationRepository() {
-    initLocalNotifications();
-  }
-
-  /// Initialize local notifications & timezone
-  Future<void> initLocalNotifications() async {
-    tz.initializeTimeZones();
-
-    const AndroidInitializationSettings androidSettings =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    const InitializationSettings settings =
-    InitializationSettings(android: androidSettings);
-
-    await _localNotifications.initialize(
-      settings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
-        print('Notification tapped: ${response.payload}');
-      },
-    );
-  }
-
-  // ------------------ Welcome Notification ------------------
+  // Welcome Notification (Login ke baad)
   Future<void> showWelcomeNotification() async {
     const androidDetails = AndroidNotificationDetails(
       'welcome_channel_id',
-      'Welcome Notifications',
-      importance: Importance.max,
+      'Welcome',
+      importance: Importance.high,
       priority: Priority.high,
+    );
+    const details = NotificationDetails(android: androidDetails);
+    await _plugin.show(0, 'Welcome!', 'We’re happy to have you on board.', details);
+  }
+
+  // Main Schedule Function
+  Future<void> scheduleNotification({
+    required String title,
+    required String body,
+    required DateTime scheduledTime,
+    required String type, // reminder, overdue, daily_summary, completion
+    String? taskId,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final DateTime finalTime = scheduledTime.isBefore(DateTime.now().add(Duration(seconds: 5)))
+        ? DateTime.now().add(Duration(seconds: 10))
+        : scheduledTime;
+
+    const androidDetails = AndroidNotificationDetails(
+      'task_channel',
+      'Task Reminders',
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+      icon: '@mipmap/ic_launcher',
     );
 
     const details = NotificationDetails(android: androidDetails);
 
-    await _localNotifications.show(
-      0,
-      'Welcome!',
-      'We’re happy to have you on board.',
-      details,
-    );
-  }
+    final int id = DateTime.now().millisecondsSinceEpoch % 1000000;
 
-  // ------------------ Show Local Notification ------------------
-  Future<void> showNotification({
-    required int id,
-    required String title,
-    required String body,
-    required DateTime scheduledTime,
-  }) async {
-    // Prevent scheduling in the past
-    final schedule = scheduledTime.isAfter(DateTime.now())
-        ? scheduledTime
-        : DateTime.now().add(const Duration(seconds: 5));
-
-    const details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        'task_channel',
-        'Task Notifications',
-        channelDescription: 'Reminders and alerts for tasks',
-        importance: Importance.max,
-        priority: Priority.high,
-      ),
-    );
-
-    await _localNotifications.zonedSchedule(
+    await _plugin.zonedSchedule(
       id,
       title,
       body,
-      tz.TZDateTime.from(schedule, tz.local), // timezone-safe
+      tz.TZDateTime.from(finalTime, tz.local),
       details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      // REMOVE old uiLocalNotificationDateInterpretation
-      // REMOVE old matchDateTimeComponents
+    );
+
+    // Save to Firebase
+    final notification = AppNotification(
+      id: '${type}_$id',
+      type: type,
+      title: title,
+      body: body,
+      scheduledTime: finalTime,
+      taskId: taskId,
+    );
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('notifications')
+        .doc('${type}_$id')
+        .set(notification.toMap());
+  }
+
+  // 1. Task Reminder (1 hour before)
+  Future<void> scheduleTaskReminder(TaskModel task) async {
+    final reminderTime = task.endTime.subtract(const Duration(hours: 1));
+    if (reminderTime.isBefore(DateTime.now())) return;
+
+    await scheduleNotification(
+      title: "Task Reminder",
+      body: 'Your task "${task.title}" is due in 1 hour',
+      scheduledTime: reminderTime,
+      type: "reminder",
+      taskId: task.id,
     );
   }
 
-  // ------------------ Save Notification to Firebase ------------------
-  Future<void> saveNotificationToFirebase(AppNotification notification) async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+  // 2. Overdue Alert
+  Future<void> scheduleOverdueAlert(TaskModel task) async {
+    if (task.endTime.isAfter(DateTime.now())) return;
 
-    final docRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('notifications')
-        .doc(notification.id);
-
-    await docRef.set(notification.toMap());
+    await scheduleNotification(
+      title: "Task Overdue!",
+      body: ' task "${task.title}" is now overdue!',
+      scheduledTime: DateTime.now().add(Duration(seconds: 5)),
+      type: "overdue",
+      taskId: task.id,
+    );
   }
 
-  // ------------------ Stream Notifications ------------------
+  // 3. Completion Celebration
+  Future<void> scheduleCompletionCelebration(TaskModel task) async {
+    await scheduleNotification(
+      title: "Task Completed!",
+      body: 'Great job completing "${task.title}"',
+      scheduledTime: DateTime.now().add(Duration(seconds: 3)),
+      type: "completion",
+      taskId: task.id,
+    );
+  }
+
+  // 4. Daily Summary (Every day 9 AM)
+  Future<void> scheduleDailySummary() async {
+    final tomorrow9AM = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day + 1,
+      9,
+      0,
+    );
+
+    await scheduleNotification(
+      title: "Good Morning!",
+      body: "You have tasks waiting for today!",
+      scheduledTime: tomorrow9AM,
+      type: "daily_summary",
+    );
+  }
+
+  // Get All Notifications (for Notification Screen)
   Stream<List<AppNotification>> getNotifications() {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return Stream.value([]);
+
     return FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
@@ -116,113 +153,20 @@ class NotificationRepository extends ChangeNotifier {
         .toList());
   }
 
-  // ------------------ Schedule Task Reminder ------------------
-  Future<void> scheduleTaskReminder(TaskModel task) async {
-    final reminderTime = task.endTime.subtract(const Duration(hours: 1));
-    final notification = AppNotification(
-      id: task.id.hashCode.toString(),
-      type: "Task Reminder",
-      title: "Task Reminder",
-      body: 'Your task "${task.title}" is due in 1 hour',
-      scheduledTime: reminderTime.isAfter(DateTime.now())
-          ? reminderTime
-          : DateTime.now().add(const Duration(seconds: 5)),
-    );
-
-    await showNotification(
-      id: int.parse(notification.id),
-      title: notification.title,
-      body: notification.body,
-      scheduledTime: notification.scheduledTime,
-    );
-
-    await saveNotificationToFirebase(notification);
-  }
-
-  // ------------------ Schedule Overdue Alert ------------------
-  Future<void> scheduleOverdueAlert(TaskModel task) async {
-    final scheduledTime =
-    task.endTime.isAfter(DateTime.now()) ? task.endTime : DateTime.now();
-
-    final notification = AppNotification(
-      id: (task.id.hashCode + 1).toString(),
-      type: "Overdue Alert",
-      title: "Task Overdue!",
-      body: 'Your task "${task.title}" is now overdue!',
-      scheduledTime: scheduledTime,
-    );
-
-    // Local notification
-    await showNotification(
-      id: int.parse(notification.id),
-      title: notification.title,
-      body: notification.body,
-      scheduledTime: notification.scheduledTime,
-    );
-
-    // Save to Firestore
-    await saveNotificationToFirebase(notification);
-
-    // Subscribe user to "overdue_tasks" topic
-    await FirebaseMessaging.instance.subscribeToTopic("overdue_tasks");
-  }
-
-
-  // ------------------ Schedule Completion Celebration ------------------
-  Future<void> scheduleCompletionCelebration(TaskModel task) async {
-    final notification = AppNotification(
-      id: (task.id.hashCode + 2).toString(),
-      type: "Completion Celebration",
-      title: "Task Completed!",
-      body: 'Congratulations on completing "${task.title}" 🎉',
-      scheduledTime: DateTime.now(),
-    );
-
-    await showNotification(
-      id: int.parse(notification.id),
-      title: notification.title,
-      body: notification.body,
-      scheduledTime: notification.scheduledTime,
-    );
-
-    await saveNotificationToFirebase(notification);
-  }
-
-  // ------------------ Schedule Daily Summary ------------------
-  Future<void> scheduleDailySummary(DateTime scheduledTime) async {
-    final notification = AppNotification(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      type: "Daily Summary",
-      title: "Today's Tasks",
-      body: "Check your tasks for today!",
-      scheduledTime:
-      scheduledTime.isAfter(DateTime.now()) ? scheduledTime : DateTime.now(),
-    );
-
-    await showNotification(
-      id: int.parse(notification.id),
-      title: notification.title,
-      body: notification.body,
-      scheduledTime: notification.scheduledTime,
-    );
-
-    await saveNotificationToFirebase(notification);
-  }
-
-  // ------------------ Firebase Messaging Listener ------------------
+  // FCM Listener Setup (Call in main or login)
   void setupFirebaseMessagingListener() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      final notification = message.notification;
+      RemoteNotification? notification = message.notification;
       if (notification != null) {
-        _localNotifications.show(
+        _plugin.show(
           notification.hashCode,
           notification.title,
           notification.body,
           const NotificationDetails(
             android: AndroidNotificationDetails(
-              'default_channel',
-              'Default Notifications',
-              importance: Importance.max,
+              'task_channel',
+              'Task Reminders',
+              importance: Importance.high,
               priority: Priority.high,
             ),
           ),

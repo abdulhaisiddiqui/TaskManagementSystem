@@ -45,24 +45,24 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text("Edit Task", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+        // AppBar ke actions mein yeh pura replace kar do
+
         actions: [
           Consumer<TaskViewModel>(
             builder: (context, vm, child) {
               return TextButton(
-                onPressed: vm.isLoading
-                    ? null
-                    : () async {
+                onPressed: vm.isLoading ? null : () async {
                   final success = await vm.saveTask();
                   if (success && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Task updated successfully!"), backgroundColor: Colors.green),
+                      SnackBar(content: Text("Task updated!"), backgroundColor: Colors.green),
                     );
                     Navigator.pop(context);
                   }
                 },
                 child: vm.isLoading
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text("Save", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF6C63FF))),
+                    ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : Text("Save", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF6C63FF))),
               );
             },
           ),

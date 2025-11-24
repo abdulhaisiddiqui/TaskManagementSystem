@@ -35,13 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _notificationRepo.setupFirebaseMessagingListener();
     _notificationRepo.showWelcomeNotification();
 
-    final now = DateTime.now();
-    final dailyTime = DateTime(now.year, now.month, now.day, 9, 0);
-    _notificationRepo.scheduleDailySummary(
-      dailyTime.isBefore(now) ? dailyTime.add(const Duration(days: 1)) : dailyTime,
-    );
-
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TaskViewModel>().loadAllTasksForHome();
     });

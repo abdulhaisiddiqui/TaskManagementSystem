@@ -7,11 +7,13 @@ import 'package:image/image.dart' as img_lib;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import '../../../viewmodels/auth_viewmodel.dart';
 
 import '../../../core/utils/widgets/profilewidgets/account_creation_card.dart';
 import '../../../core/utils/widgets/profilewidgets/edit_profile_text_field.dart';
 import '../../../core/utils/widgets/profilewidgets/profile_photo_stack.dart';
 import '../../../core/utils/widgets/profilewidgets/save_changes_button.dart';
+import '../../../core/utils/widgets/custom_snackbar.dart';
 import '../../../viewmodels/profile_viewmodel.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -62,30 +64,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final compressedBytes = img_lib.encodeJpg(resized, quality: 80);
 
       final tempDir = await getTemporaryDirectory();
-      final File tempFile = File(
-          '${tempDir.path}/profile_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      final File tempFile = File('${tempDir.path}/profile_${DateTime.now().millisecondsSinceEpoch}.jpg');
       await tempFile.writeAsBytes(compressedBytes);
 
       setState(() => _pickedImageFile = tempFile);
 
-      final userId = Provider.of<ProfileViewModel>(context, listen: false).user!.uid;
+      // Use AuthViewModel (MVVM) to upload and set profile photo
+      final authVm = Provider.of<AuthViewModel>(context, listen: false);
+      final downloadURL = await authVm.uploadProfileImage(tempFile, context);
 
-      // ✔ Correct Storage Path
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profileURL/$userId')
-          .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+      if (downloadURL != null) {
+        print("Uploaded via ViewModel: $downloadURL");
+      }
 
-      print("📤 Uploading to Firebase Storage...");
-
-      await storageRef.putFile(
-        tempFile,
-        SettableMetadata(contentType: 'image/jpeg'),
-      );
-
-      final downloadURL = await storageRef.getDownloadURL();
-
-      print("Uploaded: $downloadURL");
       return downloadURL;
 
     } catch (e) {
@@ -156,9 +147,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 SaveChangesButton(
                   onPressed: () async {
                     if (_nameController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Name cannot be empty")),
-                      );
+                      CustomSnackBar.warning(message: "Name cannot be empty", context: context);
                       return;
                     }
 
@@ -177,19 +166,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                       if (!mounted) return;
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Profile updated successfully!"),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
+                      CustomSnackBar.success(message: "Profile updated successfully!", context: context);
+
                       Navigator.pop(context);
                     } catch (e) {
                       debugPrint("Firestore Update Error: $e");
                       if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Failed to save: $e"), backgroundColor: Colors.red),
-                      );
+                      CustomSnackBar.error(message: "Failed to save: $e", context: context);
                     }
                   },
                 ),

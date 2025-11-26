@@ -26,7 +26,7 @@ class ProfileHeader extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.purple, width: 3),
+                border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.6), width: 3),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.gray900.withOpacity(0.2),
@@ -39,8 +39,8 @@ class ProfileHeader extends StatelessWidget {
                 radius: 54,
                 backgroundColor: AppColors.surfaceLight,
                 backgroundImage: user.photoURL != null && user.photoURL!.isNotEmpty
-                    ? NetworkImage(user.photoURL!)
-                    : const AssetImage("assets/images/avatar.png") as ImageProvider,
+                  ? NetworkImage(user.photoURL!)
+                  : const AssetImage('assets/appImages/profile.png') as ImageProvider,
               ),
             ),
 

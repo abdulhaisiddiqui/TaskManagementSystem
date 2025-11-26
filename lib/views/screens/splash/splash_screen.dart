@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ReuseableImageWidget(img: 'splashlogo.png',height: 320,width: 320,),
+            ReuseableImageWidget(img: 'splash2.png'),
             TextWidget(
               text: 'Manage your task, \nquickly.',
               txtStyle: TextStyle(

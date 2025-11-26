@@ -26,9 +26,10 @@ class NotificationScreen extends StatelessWidget {
             color: Color(0xFF5D5DA8),
           ),
         ),
-        leading: IconButton(onPressed: (){
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BottomNavScreen()));
-        }, icon: Icon(Icons.arrow_back_ios)),
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            onPressed: () => Navigator.pop(context)
+        ),
         actions: [
           TextButton(
             onPressed: () {

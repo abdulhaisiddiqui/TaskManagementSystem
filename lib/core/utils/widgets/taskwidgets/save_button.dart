@@ -1,6 +1,7 @@
 // core/utils/widgets/task/save_button.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:taskapp/core/utils/widgets/custom_snackbar.dart';
 
 import '../../../../viewmodels/task_viewmodel.dart';
 import '../../../../views/screens/bottomnav/bottomnav_screen.dart';
@@ -24,16 +25,8 @@ class SaveButton extends StatelessWidget {
                   ? null
                   : () async {
                 if (!vm.isValid) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text("Please fill title and valid due date"),
-                      backgroundColor: AppColors.error.withOpacity(0.9),
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  );
+                  CustomSnackBar.error(message: "Please fill title and valid due date", context: context);
+
                   return;
                 }
 
@@ -42,22 +35,7 @@ class SaveButton extends StatelessWidget {
                 if (!context.mounted) return;
 
                 if (success) {
-                  ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(
-                    SnackBar(
-                      content: const Row(
-                        children: [
-                          Icon(Icons.check_circle, color: Colors.white),
-                          SizedBox(width: 12),
-                          Text("Task saved successfully!", style: TextStyle(fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                      backgroundColor: AppColors.success,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      margin: const EdgeInsets.all(16),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
+                  CustomSnackBar.success(message: "Task saved successfully!", context: context);
 
                   Navigator.pushAndRemoveUntil(
                     context,
@@ -65,18 +43,12 @@ class SaveButton extends StatelessWidget {
                         (route) => false,
                   );
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text("Failed to save task"),
-                      backgroundColor: AppColors.error,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  );
+                  CustomSnackBar.error(message: "Failed to save task", context: context);
+
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.purple,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: AppColors.onPrimary,
                 disabledBackgroundColor: AppColors.gray500,
                 elevation: 10,

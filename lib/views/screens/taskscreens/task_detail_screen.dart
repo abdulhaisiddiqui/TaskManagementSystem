@@ -9,7 +9,7 @@ import 'package:taskapp/viewmodels/task_viewmodel.dart';
 import 'edit_task_screen.dart';
 
 class TaskDetailScreen extends StatelessWidget {
-  final String taskId; // Ab sirf taskId pass karo
+  final String taskId;
 
   const TaskDetailScreen({super.key, required this.taskId});
 
@@ -21,7 +21,7 @@ class TaskDetailScreen extends StatelessWidget {
       backgroundColor: AppColors.appBackgroundColor,
       body: SafeArea(
         child: StreamBuilder<TaskModel?>(
-          stream: taskViewModel.listenTask(taskId), // Real-time stream
+          stream: taskViewModel.listenTask(taskId),
           builder: (context, snapshot) {
             // Loading state
             if (snapshot.connectionState == ConnectionState.waiting) {

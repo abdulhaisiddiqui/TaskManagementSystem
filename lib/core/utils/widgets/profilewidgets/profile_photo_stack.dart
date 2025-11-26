@@ -30,7 +30,7 @@ class ProfilePhotoStack extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: AppColors.purple,
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.85),
               width: 4.0,
             ),
             boxShadow: [
@@ -66,7 +66,7 @@ class ProfilePhotoStack extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.purple,
+                  color: Theme.of(context).colorScheme.primary,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: Colors.white,

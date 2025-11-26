@@ -14,7 +14,9 @@ import 'package:taskapp/views/screens/loginsignup/login_screen.dart';
 import 'package:taskapp/views/screens/notification/notification_screen.dart';
 import 'package:taskapp/views/screens/taskscreens/create_task_screen.dart';
 
+import '../../../core/theme/app_theme_constants.dart';
 import '../../../core/utils/widgets/homewidgets/task_filter_bar.dart';
+import '../taskscreens/pending_task_screen.dart';
 import '../taskscreens/task_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -26,7 +28,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _notificationRepo = NotificationRepository();
-  User? currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
@@ -42,11 +43,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
     if (currentUser == null) {
       return const LoginScreen();
     }
 
-    final String userId = currentUser!.uid;
+    final String userId = currentUser.uid;
 
     return Scaffold(
       backgroundColor: AppColors.appBackgroundColor,
@@ -77,13 +80,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Text(
                               'Hello, ${profileVm.user?.displayName ?? 'User'}',
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                              style:  TextStyle(fontSize: 20, fontWeight: FontWeight.bold,color: Colors.grey.shade800),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const Text(
+                             Text(
                               'Welcome Back',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, fontFamily: 'Poppins',color: Colors.grey.shade700),
                             ),
                           ],
                         ),
@@ -93,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       // Notification Icon
                       IconButton(
-                        icon: const Icon(Icons.notifications_none_outlined),
+                        icon: Icon(Icons.notifications_none_outlined,color: Colors.grey.shade700,),
                         onPressed: () => Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(builder: (_) => const NotificationScreen()),
@@ -107,11 +110,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: const Color(0xFF828282),
-                borderRadius: BorderRadius.circular(35),
+                borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 13),
               ),
               child: StreamBuilder<DocumentSnapshot>(
                 stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
@@ -138,12 +141,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
 
                   return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(progressText, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white)),
+                            Text(
+                              progressText,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                             const SizedBox(height: 8),
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
@@ -155,14 +166,44 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Text(pendingText, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+                            Text(
+                              pendingText,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            ElevatedButton(
+                              onPressed: () {
+                                         Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const PendingTasksScreen()),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.grey.shade700,
+                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                              ),
+                              child:  Text(
+                                "Details",
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                            ),
                           ],
                         ),
                       ),
+
                       const SizedBox(width: 16),
+
                       const ReuseableImageWidget(img: 'cardimg.png'),
                     ],
                   );
+
                 },
               ),
             ),
@@ -170,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Stack(
               children: [
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                   padding: EdgeInsets.only(right: 40),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -216,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
                 Positioned(
-                  right: 20,
+                  right: 15,
                   top: 0,
                   child: Container(
                     padding: const EdgeInsets.all(8),
@@ -292,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   if (vm.isGridViewHome) {
                     return GridView.builder(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.fromLTRB(15, 15, 15, 130),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 16,
@@ -318,9 +359,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
 
                   return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: vm.filteredTasks2.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    itemCount: vm.filteredTasks2.length + 1,
                     itemBuilder: (context, index) {
+                      if (index == vm.filteredTasks2.length) {
+                        return const SizedBox(height: 120);
+                      }
                       final task = vm.filteredTasks2[index];
                       return GestureDetector(
                         onTap: () {
@@ -346,11 +390,32 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 110, right: 5),
-        child: FloatingActionButton(
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen())),
-          child: const Icon(Icons.add),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primary.withOpacity(0.85),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            shape: BoxShape.circle,
+          ),
+          child: FloatingActionButton(
+            backgroundColor: Colors.transparent, // IMPORTANT
+            elevation: 0, // so gradient looks clean
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CreateTaskScreen()),
+              );
+            },
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
         ),
       ),
+
     );
   }
 }

@@ -16,8 +16,8 @@ class StatusSelector extends StatelessWidget {
   };
 
   final Map<String, Color> selectedColors = {
-    'To Do': AppColors.gray600,
-    'In Progress': AppColors.amber,
+    'To Do': AppColors.gray600.withOpacity(0.45),
+    'In Progress': AppColors.amber.withOpacity(0.45),
     // 'Completed': AppColors.success,
   };
 

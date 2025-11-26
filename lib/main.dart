@@ -12,6 +12,7 @@ import 'package:taskapp/viewmodels/task_calender_provider.dart';
 import 'package:taskapp/viewmodels/task_viewmodel.dart';
 import 'package:taskapp/views/screens/bottomnav/bottomnav_screen.dart';
 import 'package:taskapp/views/screens/loginsignup/login_screen.dart';
+import 'package:taskapp/views/screens/splash/splash_screen.dart';
 import 'data/repositories/notificationrepository/notification_repository.dart';
 import 'firebase_options.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -98,7 +99,7 @@ class MyApp extends StatelessWidget {
           if (snapshot.hasData) {
             return const BottomNavScreen();
           }
-          return const LoginScreen();
+          return const SplashScreen();
         },
       ),
     );

@@ -2,10 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:taskapp/core/theme/app_color.dart';
+import 'package:taskapp/core/utils/widgets/custom_snackbar.dart';
 import 'package:taskapp/data/models/task_model.dart';
 import 'package:taskapp/data/repositories/taskrepository/task_repository.dart';
 import 'package:taskapp/viewmodels/task_viewmodel.dart';
 import 'package:taskapp/views/screens/taskscreens/edit_task_screen.dart';
+
+import '../../../../data/repositories/streak_service.dart';
+import '../../../theme/app_theme_constants.dart';
 
 class HomeBuildTaskCard extends StatefulWidget {
   final TaskModel task;
@@ -38,9 +43,9 @@ class _HomeBuildTaskCardState extends State<HomeBuildTaskCard> {
   Color get _statusColor {
     switch (widget.task.status) {
       case 'Completed':
-        return Colors.green;
+        return Colors.green.withOpacity(0.65);
       case 'In Progress':
-        return Colors.orange;
+        return Colors.orange.withOpacity(0.65);
       default:
         return Colors.grey;
     }
@@ -65,11 +70,21 @@ class _HomeBuildTaskCardState extends State<HomeBuildTaskCard> {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 20),
       decoration: BoxDecoration(
         color: const Color(0xFFB5B5B5).withOpacity(0.15),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.grey.shade300, width: 0.5),
+        borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 13), // 20
+        border: Border.all(
+          color:  AppColors.primary.withOpacity(0.25),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +107,7 @@ class _HomeBuildTaskCardState extends State<HomeBuildTaskCard> {
           // Title
           Text(
             widget.task.title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
           ),
           const SizedBox(height: 8),
 
@@ -115,17 +130,17 @@ class _HomeBuildTaskCardState extends State<HomeBuildTaskCard> {
             children: [
               _buildActionButton(
                 label: "Edit",
-                color: Colors.orange,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
                 onTap: () => _navigateToEdit(),
               ),
               _buildActionButton(
                 label: isCompleted ? "Reopen" : "Complete",
-                color: isCompleted ? Colors.grey.shade600 : Colors.green,
+                color: isCompleted ? Colors.grey.withOpacity(0.12) : Colors.green.withOpacity(0.22),
                 onTap: _isLoading ? null : () => _toggleCompleteStatus(),
               ),
               _buildActionButton(
                 label: "Delete",
-                color: Colors.red,
+                color: Colors.red.withOpacity(0.22),
                 onTap: _isLoading ? null : () => _deleteTask(),
               ),
             ],
@@ -145,14 +160,14 @@ class _HomeBuildTaskCardState extends State<HomeBuildTaskCard> {
       onPressed: onTap,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.grey.shade700,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
         minimumSize: const Size(90, 40),
       ),
       child: _isLoading && onTap != null
-          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary))
           : Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
     );
   }
@@ -182,19 +197,60 @@ class _HomeBuildTaskCardState extends State<HomeBuildTaskCard> {
         oldCompletionStatus: oldStatus == 'Completed', // Yeh important hai!
       );
 
+      // Update streaks & badges only when changing from non-completed -> completed
+      if (newStatus == 'Completed' && oldStatus != 'Completed') {
+        final unlocked = await StreakService.updateStreakAndBadges(widget.uid);
+        print("Streak & Badges Updated! unlocked: $unlocked");
+        if (mounted) _showUnlockedBadges(unlocked);
+      }
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Task marked as $newStatus"), backgroundColor: Colors.green),
-        );
+        CustomSnackBar.success(message: "Task marked as $newStatus", context: context);
+
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to update task"), backgroundColor: Colors.red),
-        );
+        CustomSnackBar.success(message: "Failed to update task", context: context);
+
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showUnlockedBadges(List<String> unlocked) {
+    if (unlocked.isEmpty) return;
+
+    // final messenger = ScaffoldMessenger.of(context);
+
+    if (unlocked.contains('week_warrior')) {
+      CustomSnackBar.warning(message: "🔥 Week Warrior unlocked!", context: context);
+      // messenger.showSnackBar(const SnackBar(content: Text('🔥 Week Warrior unlocked!'), backgroundColor: Colors.deepOrange));
+    }
+    if (unlocked.contains('month_master')) {
+      CustomSnackBar.info(message: "🏆 Month Master unlocked!", context: context);
+      // messenger.showSnackBar(const SnackBar(content: Text('🏆 Month Master unlocked!'), backgroundColor: Colors.purple));
+    }
+    if (unlocked.contains('fire_50')) {
+      CustomSnackBar.success(message: "🔥🔥 50-day fire unlocked!", context: context);
+      // messenger.showSnackBar(const SnackBar(content: Text('🔥🔥 50-day fire unlocked!'), backgroundColor: Colors.redAccent));
+    }
+    if (unlocked.contains('first_task')) {
+      CustomSnackBar.success(message: "✅ First task completed — Badge unlocked!", context: context);
+      // messenger.showSnackBar(const SnackBar(content: Text('✅ First task completed — Badge unlocked!'), backgroundColor: Colors.green));
+    }
+    if (unlocked.contains('legend_100')) {
+      // Show a celebratory dialog for LEGEND
+      showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('LEGEND UNLOCKED! 🎉'),
+          content: const Text('You reached a 100-day streak — legendary!'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Nice!')),
+          ],
+        ),
+      );
     }
   }
 
@@ -223,15 +279,12 @@ class _HomeBuildTaskCardState extends State<HomeBuildTaskCard> {
     try {
       await _taskViewModel.deleteTask(widget.uid, widget.task.id!, isCompleted);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Task deleted successfully"), backgroundColor: Colors.red),
-        );
+        CustomSnackBar.error(message: "Task deleted successfully", context: context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to delete task"), backgroundColor: Colors.red),
-        );
+        CustomSnackBar.error(message: "Failed to delete task", context: context);
+
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -281,8 +334,18 @@ class _HomeBuildTaskCardGridState extends State<HomeBuildTaskCardGrid> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFB5B5B5).withOpacity(0.15),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade300, width: 0.5),
+        borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 13), // 20
+        border: Border.all(
+          color:  AppColors.primary.withOpacity(0.25),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Stack(
         children: [
@@ -318,7 +381,7 @@ class _HomeBuildTaskCardGridState extends State<HomeBuildTaskCardGrid> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isCompleted ? Colors.green : Colors.orange,
+                  color: isCompleted ? Colors.green : Colors.orange.withOpacity(0.65),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -376,7 +439,7 @@ class _HomeBuildTaskCardGridState extends State<HomeBuildTaskCardGrid> {
     );
   }
 
-  // Tumhari 100% tested & solid logic — bilkul same
+
   void _navigateToEdit() {
     Navigator.push(
       context,
@@ -400,16 +463,29 @@ class _HomeBuildTaskCardGridState extends State<HomeBuildTaskCardGrid> {
         oldCompletionStatus: oldStatus == 'Completed',
       );
 
+
+      if (newStatus == 'Completed' && oldStatus != 'Completed') {
+        final unlocked = await StreakService.updateStreakAndBadges(widget.uid);
+        print("Streak & Badges Updated! unlocked: $unlocked");
+        if (mounted) _showUnlockedBadgesGrid(unlocked);
+      }
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Task marked as $newStatus"), backgroundColor: Colors.green),
-        );
+        CustomSnackBar.success(message: "Task $newStatus ho gaya!", context: context);
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text("Task $newStatus ho gaya!"),
+        //     backgroundColor: Colors.green,
+        //   ),
+        // );
       }
     } catch (e) {
+      print("Error: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to update task"), backgroundColor: Colors.red),
-        );
+        CustomSnackBar.error(message: "Failed", context: context);
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text("Failed"), backgroundColor: Colors.red),
+        // );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -440,15 +516,17 @@ class _HomeBuildTaskCardGridState extends State<HomeBuildTaskCardGrid> {
     try {
       await _taskViewModel.deleteTask(widget.uid, widget.task.id!, isCompleted);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Task deleted successfully"), backgroundColor: Colors.red),
-        );
+        CustomSnackBar.error(message: "Task deleted successfully", context: context);
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text("Task deleted successfully"), backgroundColor: Colors.red),
+        // );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to delete task"), backgroundColor: Colors.red),
-        );
+        CustomSnackBar.error(message: "Failed to delete task", context: context);
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text("Failed to delete task"), backgroundColor: Colors.red),
+        // );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -467,6 +545,41 @@ class _HomeBuildTaskCardGridState extends State<HomeBuildTaskCardGrid> {
       case 'delete':
         _deleteTask();
         break;
+    }
+  }
+
+  void _showUnlockedBadgesGrid(List<String> unlocked) {
+    if (unlocked.isEmpty) return;
+    // final messenger = ScaffoldMessenger.of(context);
+
+    if (unlocked.contains('week_warrior')) {
+      CustomSnackBar.warning(message: "🔥 Week Warrior unlocked!", context: context);
+      // messenger.showSnackBar(const SnackBar(content: Text('🔥 Week Warrior unlocked!'), backgroundColor: Colors.deepOrange));
+    }
+    if (unlocked.contains('month_master')) {
+      CustomSnackBar.info(message: "🏆 Month Master unlocked!", context: context);
+      // messenger.showSnackBar(const SnackBar(content: Text('🏆 Month Master unlocked!'), backgroundColor: Colors.purple));
+    }
+    if (unlocked.contains('fire_50')) {
+      CustomSnackBar.success(message: "🔥🔥 50-day fire unlocked!", context: context);
+      // messenger.showSnackBar(const SnackBar(content: Text('🔥🔥 50-day fire unlocked!'), backgroundColor: Colors.redAccent));
+    }
+    if (unlocked.contains('first_task')) {
+      CustomSnackBar.success(message: "✅ First task completed — Badge unlocked!", context: context);
+      // messenger.showSnackBar(const SnackBar(content: Text('✅ First task completed — Badge unlocked!'), backgroundColor: Colors.green));
+    }
+    if (unlocked.contains('legend_100')) {
+      // Show a celebratory dialog for LEGEND
+      showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('LEGEND UNLOCKED! 🎉'),
+          content: const Text('You reached a 100-day streak — legendary!'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Nice!')),
+          ],
+        ),
+      );
     }
   }
 }

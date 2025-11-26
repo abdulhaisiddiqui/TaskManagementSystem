@@ -16,9 +16,9 @@ class PrioritySelector extends StatelessWidget {
   };
 
   final Map<String, Color> selectedColors = {
-    'Low': AppColors.success,
-    'Medium': AppColors.amber,
-    'High': AppColors.error,
+    'Low': AppColors.success.withOpacity(0.45),
+    'Medium': AppColors.amber.withOpacity(0.45),
+    'High': AppColors.error.withOpacity(0.45),
   };
 
   final Map<String, IconData> priorityIcons = {
@@ -42,12 +42,12 @@ class PrioritySelector extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(0.85),
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
 
 
             Wrap(
-              spacing: 14,
-              runSpacing: 12,
+              spacing: 12,
+              runSpacing: 10,
               children: ['Low', 'Medium', 'High'].map((priority) {
                 final bool isSelected = vm.task.priority == priority;
 

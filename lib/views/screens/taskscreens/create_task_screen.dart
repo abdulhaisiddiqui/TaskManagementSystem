@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:taskapp/core/theme/theme.dart';
 import 'package:taskapp/views/screens/bottomnav/bottomnav_screen.dart';
 import 'package:taskapp/views/screens/home/home_screen.dart';
 
@@ -27,15 +28,13 @@ class CreateTaskScreen extends StatelessWidget {
         return vm;
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F0FF),
+        backgroundColor: AppColors.appBackgroundColor,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BottomNavScreen()));
-            },
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            onPressed: () => Navigator.pop(context)
           ),
           title: const Text("Create task", style: TextStyle(color: Colors.black)),
         ),

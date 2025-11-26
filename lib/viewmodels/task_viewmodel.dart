@@ -9,7 +9,7 @@ import '../data/models/task_model.dart';
 import '../data/repositories/taskrepository/task_repository.dart';
 import '../data/repositories/notificationrepository/notification_repository.dart';
 
-enum TaskSortBy { priority, category }
+enum TaskSortBy { priority, category, status, date }
 
 class TaskViewModel extends ChangeNotifier {
   final TaskRepository _repo = TaskRepository();
@@ -372,7 +372,11 @@ class TaskViewModel extends ChangeNotifier {
 
   void loadAllTasksForHome() {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+    if (uid == null) {
+      _tasksLoading = false;
+      notifyListeners();
+      return;
+    }
 
     _tasksLoading = true;
     notifyListeners();
@@ -387,6 +391,11 @@ class TaskViewModel extends ChangeNotifier {
               .map((doc) => TaskModel.fromMap(doc.data(), doc.id))
               .toList();
 
+          _tasksLoading = false;
+          notifyListeners();
+        }, onError: (error) {
+          // On error, stop loading and notify
+          print('Error loading tasks: $error');
           _tasksLoading = false;
           notifyListeners();
         });

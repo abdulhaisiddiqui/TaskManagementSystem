@@ -1,5 +1,12 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:typed_data';
+import '../core/utils/widgets/custom_snackbar.dart';
+import '../data/repositories/notificationrepository/notification_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -45,11 +52,11 @@ class AuthViewModel extends ChangeNotifier {
         MaterialPageRoute(builder: (_) => LoginScreen()),
       );
 
-    }on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       final errorMessage = FirebaseErrorMapper().handleAuthError(e.code);
-      _showSnackBar(context, errorMessage);
+      CustomSnackBar.error(message: errorMessage, context: context);
     } catch (e) {
-      _showSnackBar(context, "Something went wrong: $e");
+      CustomSnackBar.error(message: "Something went wrong: $e", context: context);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -90,7 +97,7 @@ class AuthViewModel extends ChangeNotifier {
           await _authRepository.createUserDoc(user.uid, userModel);
         }
 
-        _showSnackBar(context, "Login successful!");
+        CustomSnackBar.success(message: "Login successful!", context: context);
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => HomeScreen()),
@@ -102,16 +109,16 @@ class AuthViewModel extends ChangeNotifier {
               (route) => false,
         );
       } else {
-        _showSnackBar(context, "Please verify your email first.");
+        CustomSnackBar.warning(message: "Please verify your email first.", context: context);
 
         await _authRepository.logout(context: context);
       }
 
     } on FirebaseAuthException catch (e) {
       final errorMessage = FirebaseErrorMapper().handleAuthError(e.code);
-          _showSnackBar(context, errorMessage);
+          CustomSnackBar.error(message: errorMessage, context: context);
     } catch (e) {
-      _showSnackBar(context, "Something went wrong: $e");
+      CustomSnackBar.error(message: "Something went wrong: $e", context: context);
     } finally {
       setLoading(false);
     }
@@ -122,9 +129,7 @@ class AuthViewModel extends ChangeNotifier {
     try {
       await _authRepository.logout(context: context);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Logged out successfully")),
-      );
+      CustomSnackBar.success(message: "Logged out successfully", context: context);
 
       Navigator.pushAndRemoveUntil(
         context,
@@ -132,36 +137,93 @@ class AuthViewModel extends ChangeNotifier {
             (route) => false,
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Logout failed: $e")),
-      );
+      CustomSnackBar.error(message: "Logout failed: $e", context: context);
     } finally {
       setLoading(false);
     }
   }
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: TextWidget(
-          text: message,
-          txtStyle: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Poppins',
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: const Color(0xFF828282).withOpacity(0.9), // Fixed color format
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 24), // top, bottom, left, right = 24
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15), // optional for softer corners
-        ),
-        elevation: 0, // removes the blur/shadow effect
-      ),
-    );
+  /// Upload profile image via repository and update local user model.
+  Future<String?> uploadProfileImage(File file, BuildContext context) async {
+    setLoading(true);
+
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+
+      if (uid == null) {
+        CustomSnackBar.warning(
+          message: 'User not logged in',
+          context: context,
+        );
+        return null;
+      }
+
+      // Upload image and get URL
+      final String? url = await _authRepository.uploadAndSetProfilePhoto(
+        file: file,
+        uid: uid,
+        context: context,
+      );
+
+      if (url == null) {
+        CustomSnackBar.error(
+          message: "Failed to upload image",
+          context: context,
+        );
+        return null;
+      }
+
+      // Update local user model
+      if (_user != null) {
+        _user = _user!.copyWith(photoURL: url);
+        notifyListeners();
+      }
+
+      return url;
+    } catch (e) {
+      CustomSnackBar.error(
+        message: 'Upload failed: $e',
+        context: context,
+      );
+      return null;
+    } finally {
+      setLoading(false);
+    }
   }
 
 
+  /// Debug helper: attempt a small write to Storage to verify bucket/rules.
+  Future<bool> debugStorageWriteTest(BuildContext context) async {
+    setLoading(true);
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) {
+        CustomSnackBar.warning(message: 'User not logged in', context: context);
+        return false;
+      }
 
+      final path = 'users/$uid/debug_test_${DateTime.now().millisecondsSinceEpoch}.bin';
+      final ref = FirebaseStorage.instance.ref().child(path);
+
+      final Uint8List data = Uint8List.fromList([0, 1, 2, 3]);
+
+      final taskSnapshot = await ref.putData(data, SettableMetadata(contentType: 'application/octet-stream'));
+
+      // Try to get download URL to confirm object exists
+      final downloadUrl = await taskSnapshot.ref.getDownloadURL();
+      debugPrint('Debug upload succeeded: $downloadUrl');
+      CustomSnackBar.success(message: 'Debug upload succeeded', context: context);
+      return true;
+    } on FirebaseException catch (e) {
+      debugPrint('FirebaseException during debug upload: code=${e.code} message=${e.message}');
+      CustomSnackBar.error(message: 'Debug upload failed: ${e.message ?? e.code}', context: context);
+      return false;
+    } catch (e) {
+      debugPrint('Unexpected error during debug upload: $e');
+      CustomSnackBar.error(message: 'Debug upload failed: $e', context: context);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
 }
+

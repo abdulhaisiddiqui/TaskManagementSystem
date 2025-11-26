@@ -75,7 +75,7 @@ class _TaskFilterBarState extends State<TaskFilterBar> {
             _closeDropdown();
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
             child: Row(
               children: [
                 Icon(_getIcon(option), size: 20, color: const Color(0xFF6C63FF)),

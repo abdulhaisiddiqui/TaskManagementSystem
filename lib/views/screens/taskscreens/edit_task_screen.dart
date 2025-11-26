@@ -7,6 +7,7 @@ import 'package:taskapp/core/theme/app_color.dart';
 import 'package:taskapp/data/models/task_model.dart';
 import 'package:taskapp/viewmodels/task_viewmodel.dart';
 
+import '../../../core/utils/widgets/custom_snackbar.dart';
 import '../../../core/utils/widgets/taskwidgets/custom_dropdown.dart';
 import '../../../core/utils/widgets/taskwidgets/custom_text_fields.dart';
 import '../../../core/utils/widgets/taskwidgets/date_time_card.dart';
@@ -45,7 +46,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text("Edit Task", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
-        // AppBar ke actions mein yeh pura replace kar do
+
 
         actions: [
           Consumer<TaskViewModel>(
@@ -54,9 +55,8 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                 onPressed: vm.isLoading ? null : () async {
                   final success = await vm.saveTask();
                   if (success && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Task updated!"), backgroundColor: Colors.green),
-                    );
+                    CustomSnackBar.success(message: "Task updated!", context: context);
+
                     Navigator.pop(context);
                   }
                 },

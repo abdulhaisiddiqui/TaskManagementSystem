@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:taskapp/core/utils/constants/app_constants.dart';
+import 'package:taskapp/core/utils/widgets/build_social_icon.dart';
 import 'package:taskapp/core/utils/widgets/reuseable_buttons.dart';
 import 'package:taskapp/core/utils/widgets/reuseable_fields.dart';
 import 'package:taskapp/core/utils/widgets/reuseable_image_widget.dart';
@@ -32,7 +33,86 @@ class _LoginScreenState extends State<LoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: 120),
-            ReuseableImageWidget(img: 'loginimg.png', height: 180, width: 350),
+            // ReuseableImageWidget(img: 'login.png', height: 240, width: 350),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  Text(
+                    'Log in to ChatBox',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    'Welcome back! Sign in using your social account or email to continue us',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF757575),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 30,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                BuildSocialIcon(
+                  icon: Image.asset(
+                    'assets/appImages/google-logo.png',
+                    width: 24,
+                    height: 24,
+                  ),
+                  callback: () {  },
+                ),
+                const SizedBox(width: 16),
+                BuildSocialIcon(
+                    icon: Icon(Icons.apple,color: Colors.black,),
+                    callback: () {  },
+                ),
+                const SizedBox(width: 16),
+                BuildSocialIcon(
+                  icon: Icon(Icons.facebook,color: Color(0xFF1976D2),),
+                  callback: () {  },
+                ),
+              ],
+            ),
+
+            SizedBox(height: 30,),
+            Row(
+              children: [
+                Expanded(
+                  child: Divider(
+                    color: Colors.grey.shade300,
+                    thickness: 1,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    'OR',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Divider(
+                    color: Colors.grey.shade300,
+                    thickness: 1,
+                  ),
+                ),
+              ],
+            ),
+
+            // Description Text
+
             SizedBox(height: 30),
             ReuseableFields(
               controller: emailController,

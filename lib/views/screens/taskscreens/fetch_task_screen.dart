@@ -308,13 +308,13 @@ class TaskListView extends StatelessWidget {
             ),
             itemCount: vm.filteredTasksTodayScreen2.length,
             itemBuilder: (context, index) {
-              final task = vm.filteredTasksTodayScreen2[index];
+              final task = vm.filteredTasks2[index];
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TaskDetailScreen(task: task),
+                      builder: (_) => TaskDetailScreen(taskId: task.id!,),
                     ),
                   );
                 },
@@ -333,7 +333,7 @@ class TaskListView extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TaskDetailScreen(task: task),
+                      builder: (_) => TaskDetailScreen(taskId: task.id!,),
                     ),
                   );
                 },

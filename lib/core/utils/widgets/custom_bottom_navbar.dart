@@ -22,10 +22,10 @@ class FloatingBottomNavBar extends StatelessWidget {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 30),
         child: Material(
           elevation: 24,
-          borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 8), // 20
+          borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 13), // 20
           color: Colors.transparent,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 8),

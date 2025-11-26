@@ -24,7 +24,7 @@ class SaveChangesButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.purple,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: AppColors.onPrimary,
           disabledBackgroundColor: AppColors.gray500,
           elevation: 8,

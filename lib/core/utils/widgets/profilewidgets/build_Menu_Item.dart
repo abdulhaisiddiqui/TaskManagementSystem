@@ -37,15 +37,15 @@ class _BuildMenuItemState extends State<BuildMenuItem> with TickerProviderStateM
 
 
     final Color backgroundColor = widget.isLogout
-        ? (isDark ? AppColors.purple.withOpacity(0.2) : const Color(0xFFF5F0FF))
+        ? (isDark ? Theme.of(context).colorScheme.primary.withOpacity(0.2) : const Color(0xFFF5F0FF))
         : Theme.of(context).colorScheme.surface;
 
     final Color borderColor = widget.isLogout
-        ? AppColors.purple.withOpacity(0.4)
+        ? Theme.of(context).colorScheme.primary.withOpacity(0.4)
         : AppColors.gray300;
 
     final Color iconAndTextColor = widget.isLogout
-        ? AppColors.purple
+        ? Theme.of(context).colorScheme.primary
         : Theme.of(context).colorScheme.onSurface;
 
     return GestureDetector(
@@ -55,7 +55,7 @@ class _BuildMenuItemState extends State<BuildMenuItem> with TickerProviderStateM
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
+          borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 8),
           border: Border.all(
             color: borderColor,
             width: AppThemeConstants.borderWidth,

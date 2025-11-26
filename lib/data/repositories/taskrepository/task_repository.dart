@@ -6,6 +6,16 @@ import '../../models/task_model.dart';
 class TaskRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  Stream<TaskModel?> getTaskById(String id) {
+    return _firestore
+        .collection("tasks")
+        .doc(id)
+        .snapshots()
+        .map((doc) {
+      if (!doc.exists) return null;
+      return TaskModel.fromMap(doc.data()!, doc.id);
+    });
+  }
   // Fetch tasks
   Stream<List<TaskModel>> fetchTasks(String uid) {
     return _firestore

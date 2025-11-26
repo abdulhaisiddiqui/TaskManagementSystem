@@ -20,10 +20,10 @@ class CategorySelector extends StatelessWidget {
   };
 
   final Map<String, Color> categorySelectedColors = {
-    'Personal': AppColors.primary,
-    'Work': AppColors.amber,
-    'Study': AppColors.info,
-    'Other': AppColors.purple,
+    'Personal': AppColors.primary.withOpacity(0.45),
+    'Work': AppColors.amber.withOpacity(0.45),
+    'Study': AppColors.info.withOpacity(0.45),
+    'Other': AppColors.purple.withOpacity(0.45),
   };
 
   @override

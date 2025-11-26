@@ -43,14 +43,14 @@ class DescriptionTextField extends StatelessWidget {
 
 
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
+              borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 13),
               borderSide: BorderSide(
                 color: AppColors.gray400.withOpacity(0.5),
                 width: AppThemeConstants.borderWidth,
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
+              borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 13),
               borderSide: BorderSide(
                 color: AppColors.primary,
                 width: AppThemeConstants.borderWidth,

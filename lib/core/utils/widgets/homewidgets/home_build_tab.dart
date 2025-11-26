@@ -68,7 +68,7 @@ class HomeBuildTab extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: isSelected ? AppColors.onBackgroundDark : Theme.of(context).colorScheme.onSurface,
+                color: isSelected ? AppColors.onBackgroundDark : Colors.grey.shade700,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                 fontSize: 15,
                 letterSpacing: 0.3,

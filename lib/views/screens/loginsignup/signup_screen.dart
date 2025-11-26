@@ -29,7 +29,32 @@ class _SignupScreenState extends State<SignupScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ReuseableImageWidget(img: 'loginimg.png', height: 140, width: 280),
+            // ReuseableImageWidget(img: 'loginimg.png', height: 140, width: 280),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  Text(
+                    'Sign up to Taskapp',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    'Set task today by signing up \nfor our task app!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF757575),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 30,),
             SizedBox(height: 30),
             ReuseableFields(
               controller: usernameController,

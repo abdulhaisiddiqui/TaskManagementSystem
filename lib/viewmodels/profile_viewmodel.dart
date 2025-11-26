@@ -1,5 +1,6 @@
 
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,6 +17,7 @@ class ProfileViewModel extends ChangeNotifier {
 
   late final TextEditingController nameController = TextEditingController();
   late final TextEditingController emailController = TextEditingController();
+  late StreamSubscription<User?> _authSubscription;
 
 
   UserModel? get user => _user;
@@ -25,6 +27,16 @@ class ProfileViewModel extends ChangeNotifier {
 
   ProfileViewModel() {
     loadUser();
+    // Listen to auth state changes and reload user when logged in
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null) {
+        loadUser(); // Reload when user logs in
+      } else {
+        _user = null;
+        _isLoading = false;
+        notifyListeners();
+      }
+    });
   }
 
   Future<void> loadUser() async {
@@ -155,6 +167,7 @@ class ProfileViewModel extends ChangeNotifier {
   void dispose() {
     nameController.dispose();
     emailController.dispose();
+    _authSubscription.cancel();
     super.dispose();
   }
 }

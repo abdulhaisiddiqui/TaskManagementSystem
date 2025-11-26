@@ -17,7 +17,6 @@ class LoginScreen extends StatefulWidget {
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
-
 final TextEditingController emailController = TextEditingController();
 final TextEditingController passwordController = TextEditingController();
 
@@ -39,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 children: [
                   Text(
-                    'Log in to ChatBox',
+                    'Log in to Taskapp',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -68,7 +67,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 24,
                     height: 24,
                   ),
-                  callback: () {  },
+                  callback: () async{
+                    final authVm = Provider.of<AuthViewModel>(context, listen: false);
+                    await authVm.signInWithGoogle(context);
+                  },
                 ),
                 const SizedBox(width: 16),
                 BuildSocialIcon(

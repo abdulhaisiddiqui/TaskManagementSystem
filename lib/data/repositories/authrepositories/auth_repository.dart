@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/utils/widgets/custom_snackbar.dart';
 import '../../../core/errors/firebase_error_mapper.dart';
@@ -189,6 +190,70 @@ class AuthRepository {
     return null;
   }
 
+
+
+  /// Sign in with Google and ensure a Firestore user doc exists.
+  Future<User?> signInWithGoogle({required BuildContext context}) async {
+    try {
+      final googleSignIn = GoogleSignIn.standard();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return null; // user cancelled
+
+      final googleAuth = await googleUser.authentication;
+
+      // `googleAuth` shape can vary across package versions; use dynamic accessors
+      final dynamic dynAuth = googleAuth;
+      final accessToken = dynAuth.accessToken as String?;
+      final idToken = dynAuth.idToken as String?;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: accessToken,
+        idToken: idToken,
+      );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+      final user = userCredential.user;
+      if (user == null) return null;
+
+      // Ensure Firestore user doc exists
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      if (!userDoc.exists) {
+        final userModel = UserModel(
+          uid: user.uid,
+          email: user.email ?? '',
+          displayName: user.displayName ?? '',
+          photoURL: user.photoURL,
+          createdAt: DateTime.now(),
+          notificationSettings: {
+            'enabled': true,
+            'dailySummaryTime': '08:00',
+            'defaultReminderTime': 60,
+          },
+          stats: {
+            'totalTasks': 0,
+            'completedTasks': 0,
+            'pendingTasks': 0,
+            'currentStreak': 0,
+            'longestStreak': 0,
+            'lastActiveDate': null,
+            'totalTasksCompleted': 0,
+          },
+        );
+
+        await _firestore.collection('users').doc(user.uid).set(userModel.toMap());
+      }
+
+      return user;
+    } on FirebaseAuthException catch (e) {
+      final msg = FirebaseErrorMapper().handleAuthError(e.code);
+      CustomSnackBar.error(message: msg, context: context);
+    } catch (e) {
+      CustomSnackBar.error(message: 'Google sign-in failed: $e', context: context);
+    }
+
+    return null;
+  }
+
   /// Uploads [file] to Firebase Storage at `users/{uid}/profile.jpg`, updates
   /// the Firebase Auth user's `photoURL` and merges the `photoURL` into
   /// Firestore `users/{uid}` document. Returns the download URL on success.
@@ -196,50 +261,51 @@ class AuthRepository {
     required File file,
     required String uid,
     required BuildContext context,
+    String? storagePath,
   }) async {
     if (!await file.exists()) {
-      CustomSnackBar.error(message: "Image file does NOT exist!", context: context);
+      CustomSnackBar.error(message: "Selected file does not exist", context: context);
       return null;
     }
 
     try {
-      // FINAL FIX → Use a FIXED PATH (never dynamic folder)
-      final path = "profile_images/$uid.jpg";
+      final filename = 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final path = storagePath ?? 'users/$uid/$filename';
+      final storageRef = FirebaseStorage.instance.ref().child(path);
 
-      debugPrint("Uploading to: $path");
+      debugPrint('Uploading profile photo to Storage path: $path');
 
-      final ref = FirebaseStorage.instance.ref().child(path);
-
-      // -------- Upload the file --------
-      final uploadTask = ref.putFile(
+      final taskSnapshot = await storageRef.putFile(
         file,
-        SettableMetadata(contentType: "image/jpeg"),
+        SettableMetadata(contentType: 'image/jpeg'),
       );
 
-      // WAIT until the upload completes
-      final snapshot = await uploadTask.whenComplete(() {});
+      // Ensure the uploaded object exists and get URL
+      final downloadURL = await taskSnapshot.ref.getDownloadURL();
 
-      // -------- Now fetch the URL --------
-      final downloadURL = await snapshot.ref.getDownloadURL();
+      debugPrint('Upload succeeded. downloadURL: $downloadURL');
 
-      debugPrint("UPLOAD SUCCESS → $downloadURL");
+      // Update Firebase Auth profile if current user matches
+      final currentUser = _auth.currentUser;
+      if (currentUser != null && currentUser.uid == uid) {
+        try {
+          await currentUser.updatePhotoURL(downloadURL);
+        } catch (e) {
+          debugPrint('Warning: failed to update Auth photoURL: $e');
+        }
+      }
 
-      // -------- Update Firestore --------
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(uid)
-          .update({'photoURL': downloadURL});
+      // Merge photoURL into Firestore user doc
+      await _firestore.collection('users').doc(uid).set({'photoURL': downloadURL}, SetOptions(merge: true));
 
-      CustomSnackBar.success(message: "Profile photo updated!", context: context);
-
+      CustomSnackBar.success(message: 'Profile photo updated', context: context);
       return downloadURL;
     } on FirebaseException catch (e) {
-      debugPrint("🔥 FIREBASE ERROR: ${e.code} → ${e.message}");
-      CustomSnackBar.error(
-          message: "Firebase Error: ${e.message}", context: context);
+      debugPrint('FirebaseException during upload: code=${e.code} message=${e.message}');
+      CustomSnackBar.error(message: 'Upload failed: ${e.message ?? e.code}', context: context);
     } catch (e) {
-      debugPrint("🔥 UNEXPECTED ERROR: $e");
-      CustomSnackBar.error(message: "Upload failed: $e", context: context);
+      debugPrint('Unexpected error during upload: $e');
+      CustomSnackBar.error(message: 'Upload failed: $e', context: context);
     }
 
     return null;

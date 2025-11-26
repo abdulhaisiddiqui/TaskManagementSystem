@@ -142,54 +142,52 @@ class AuthViewModel extends ChangeNotifier {
       setLoading(false);
     }
   }
+
+  /// Sign in with Google (MVVM). Calls repository and navigates on success.
+  Future<void> signInWithGoogle(BuildContext context) async {
+    setLoading(true);
+    try {
+      final user = await _authRepository.signInWithGoogle(context: context);
+      if (user != null) {
+        // After sign-in, navigate to app main screen
+        CustomSnackBar.success(message: 'Signed in with Google', context: context);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const BottomNavScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      CustomSnackBar.error(message: 'Google sign-in failed: $e', context: context);
+    } finally {
+      setLoading(false);
+    }
+  }
   /// Upload profile image via repository and update local user model.
   Future<String?> uploadProfileImage(File file, BuildContext context) async {
     setLoading(true);
-
     try {
       final uid = FirebaseAuth.instance.currentUser?.uid;
-
       if (uid == null) {
-        CustomSnackBar.warning(
-          message: 'User not logged in',
-          context: context,
-        );
+        CustomSnackBar.warning(message: 'User not logged in', context: context);
         return null;
       }
 
-      // Upload image and get URL
-      final String? url = await _authRepository.uploadAndSetProfilePhoto(
-        file: file,
-        uid: uid,
-        context: context,
-      );
+      final url = await _authRepository.uploadAndSetProfilePhoto(file: file, uid: uid, context: context);
 
-      if (url == null) {
-        CustomSnackBar.error(
-          message: "Failed to upload image",
-          context: context,
-        );
-        return null;
-      }
-
-      // Update local user model
-      if (_user != null) {
+      if (url != null && _user != null) {
         _user = _user!.copyWith(photoURL: url);
         notifyListeners();
       }
 
       return url;
     } catch (e) {
-      CustomSnackBar.error(
-        message: 'Upload failed: $e',
-        context: context,
-      );
+      CustomSnackBar.error(message: 'Upload failed: $e', context: context);
       return null;
     } finally {
       setLoading(false);
     }
   }
-
 
   /// Debug helper: attempt a small write to Storage to verify bucket/rules.
   Future<bool> debugStorageWriteTest(BuildContext context) async {

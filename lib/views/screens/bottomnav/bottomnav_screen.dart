@@ -8,7 +8,7 @@ import 'package:taskapp/views/screens/taskscreens/fetch_task_screen.dart';
 
 import '../../../core/utils/widgets/custom_bottom_navbar.dart';
 import 'package:taskapp/views/screens/profile/profile_screen.dart';
-import '../../task_screen.dart';
+
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});

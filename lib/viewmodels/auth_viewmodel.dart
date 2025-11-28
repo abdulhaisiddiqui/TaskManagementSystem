@@ -19,6 +19,7 @@ import '../main.dart';
 import '../views/screens/bottomnav/bottomnav_screen.dart';
 import '../views/screens/home/home_screen.dart';
 import '../views/screens/loginsignup/login_screen.dart';
+import '../data/local/local_database_helper.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final _authRepository = AuthRepository();
@@ -32,6 +33,7 @@ class AuthViewModel extends ChangeNotifier {
 
   void setLoading(bool value){
     _isLoading = value;
+    notifyListeners();
   }
 
   String? _error;
@@ -43,15 +45,27 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> signUp(String email, String password, String displayName,BuildContext context) async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+
 
     try {
       _user = await _authRepository.signUp(displayName: displayName, email: email, password: password, context: context);
+      // Save basic user info locally for offline login/session (no passwords)
+      if (_user != null) {
+        try {
+          await LocalDatabaseHelper().saveUserOffline(
+            uid: _user!.uid,
+            email: _user!.email,
+            displayName: _user!.displayName,
+            photoURL: _user!.photoURL,
+            createdAt: _user!.createdAt,
+          );
+        } catch (_) {}
+      }
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => LoginScreen()),
       );
-
+      notifyListeners();
     } on FirebaseAuthException catch (e) {
       final errorMessage = FirebaseErrorMapper().handleAuthError(e.code);
       CustomSnackBar.error(message: errorMessage, context: context);
@@ -68,11 +82,11 @@ class AuthViewModel extends ChangeNotifier {
     required String password,
     required BuildContext context,
   }) async {
-    setLoading(true);
+    isLoading = true;  // Direct setter use karo, setter trigger karega notifyListeners
     _error = null;
 
     try {
-      final user = await _authRepository.login(email: email, password: password,context: context);
+      final user = await _authRepository.login(email: email, password: password, context: context);
 
       if (user != null && user.emailVerified) {
         final userDoc = await _authRepository.getUserDoc(user.uid);
@@ -95,32 +109,45 @@ class AuthViewModel extends ChangeNotifier {
             },
           );
           await _authRepository.createUserDoc(user.uid, userModel);
+
+          await LocalDatabaseHelper().saveUserOffline(
+            uid: userModel.uid,
+            email: userModel.email,
+            displayName: userModel.displayName,
+            photoURL: userModel.photoURL,
+            createdAt: userModel.createdAt,
+          );
+        } else {
+          final data = userDoc.data()!;
+          final savedUser = UserModel.fromMap(user.uid, data);
+          await LocalDatabaseHelper().saveUserOffline(
+            uid: savedUser.uid,
+            email: savedUser.email,
+            displayName: savedUser.displayName,
+            photoURL: savedUser.photoURL,
+            createdAt: savedUser.createdAt,
+          );
         }
 
         CustomSnackBar.success(message: "Login successful!", context: context);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => HomeScreen()),
-              );
-        // Login success ke baad
-        Navigator.pushAndRemoveUntil(
+
+        // Navigation ke PEHLE loading false mat karo
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const BottomNavScreen()),
-              (route) => false,
+          MaterialPageRoute(builder: (_) => BottomNavScreen()),
         );
+
       } else {
         CustomSnackBar.warning(message: "Please verify your email first.", context: context);
-
         await _authRepository.logout(context: context);
       }
-
     } on FirebaseAuthException catch (e) {
       final errorMessage = FirebaseErrorMapper().handleAuthError(e.code);
-          CustomSnackBar.error(message: errorMessage, context: context);
+      CustomSnackBar.error(message: errorMessage, context: context);
     } catch (e) {
       CustomSnackBar.error(message: "Something went wrong: $e", context: context);
     } finally {
-      setLoading(false);
+      isLoading = false;
     }
   }
   Future<void> logout(BuildContext context) async {
@@ -224,4 +251,3 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 }
-

@@ -27,7 +27,7 @@ class NotificationScreen extends StatelessWidget {
           ),
         ),
         leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF5D5DA8)),
             onPressed: () => Navigator.pop(context)
         ),
         actions: [

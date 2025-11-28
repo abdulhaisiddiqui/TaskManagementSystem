@@ -69,79 +69,111 @@ class _HomeBuildTaskCardState extends State<HomeBuildTaskCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 20),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      constraints: const BoxConstraints(
+        minHeight: 138,
+        maxHeight: 172,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFFB5B5B5).withOpacity(0.15),
-        borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 13), // 20
-        border: Border.all(
-          color:  AppColors.primary.withOpacity(0.25),
-          width: 1.5,
-        ),
+        color: const Color(0xFFFAF9FF).withOpacity(0.92),
+        borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 13),
+        border: Border.all(color: AppColors.primary.withOpacity(0.28), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.07),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
+
           Row(
             children: [
               CircleAvatar(
-                radius: 5,
+                radius: 4.5,
                 backgroundColor: _getPriorityColor(widget.task.priority),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Text(
                 _timeRange,
-                style: const TextStyle(fontSize: 14, color: Colors.black54),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 9),
 
-          // Title
+          // Title (Bigger but controlled)
           Text(
             widget.task.title,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+            style: const TextStyle(
+              fontSize: 17.5,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 7),
 
-          // Category & Status
+          // Category & Status → Modern Chips Style
           Row(
             children: [
-              Text("Category: ${widget.task.category}", style: const TextStyle(fontSize: 13, color: Colors.black54)),
-              const SizedBox(width: 20),
-              Text(
-                "Status: ${widget.task.status}",
-                style: TextStyle(fontSize: 13, color: _statusColor, fontWeight: FontWeight.w600),
+              _buildChip(
+                icon: Icons.category_outlined,
+                label: widget.task.category,
+                color: Colors.grey.shade600,
+              ),
+              const SizedBox(width: 14),
+              _buildChip(
+                icon: Icons.circle,
+                label: widget.task.status,
+                color: _statusColor,
+                fontWeight: FontWeight.w600,
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
 
-          // Action Buttons
+
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildActionButton(
-                label: "Edit",
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
-                onTap: () => _navigateToEdit(),
+              Expanded(
+                child: _buildActionButton(
+                  label: "Edit",
+                  bgColor: const Color(0xFFE8E7FF),
+                  textColor: const Color(0xFF6C63FF),
+                  onTap: () => _navigateToEdit(),
+                  isLoading: _isLoading,
+                ),
               ),
-              _buildActionButton(
-                label: isCompleted ? "Reopen" : "Complete",
-                color: isCompleted ? Colors.grey.withOpacity(0.12) : Colors.green.withOpacity(0.22),
-                onTap: _isLoading ? null : () => _toggleCompleteStatus(),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildActionButton(
+                  label: isCompleted ? "Reopen" : "Complete",
+                  bgColor: isCompleted ? Colors.grey.shade200 : const Color(0xFFE8F5E8),
+                  textColor: isCompleted ? Colors.grey.shade600 : const Color(0xFF2E7D32),
+                  onTap: _isLoading ? null : () => _toggleCompleteStatus(),
+                  isLoading: _isLoading,
+                ),
               ),
-              _buildActionButton(
-                label: "Delete",
-                color: Colors.red.withOpacity(0.22),
-                onTap: _isLoading ? null : () => _deleteTask(),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildActionButton(
+                  label: "Delete",
+                  bgColor: const Color(0xFFFFEBEE),
+                  textColor: const Color(0xFFD32F2F),
+                  onTap: _isLoading ? null : () => _deleteTask(),
+                  isLoading: _isLoading,
+                ),
               ),
             ],
           ),
@@ -149,26 +181,72 @@ class _HomeBuildTaskCardState extends State<HomeBuildTaskCard> {
       ),
     );
   }
+  Widget _buildChip({
+    required IconData icon,
+    required String label,
+    required Color color,
+    FontWeight fontWeight = FontWeight.w500,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: TextStyle(fontSize: 12.8, color: color, fontWeight: fontWeight),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
 
   // Reusable Button
   Widget _buildActionButton({
     required String label,
-    required Color color,
+    required Color bgColor,
+    required Color textColor,
     required VoidCallback? onTap,
+    bool isLoading = false,
   }) {
-    return ElevatedButton(
-      onPressed: onTap,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.grey.shade700,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-        minimumSize: const Size(90, 40),
+    return Expanded(
+      child: SizedBox(
+        height: 38,
+        child: ElevatedButton(
+          onPressed: isLoading ? null : onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: bgColor,
+            foregroundColor: textColor,
+            elevation: 0,
+            disabledBackgroundColor: bgColor.withOpacity(0.6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap, // ← Kam touch area
+          ),
+          child: isLoading
+              ? const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.2,
+              valueColor: AlwaysStoppedAnimation(Colors.white),
+            ),
+          )
+              : FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+        ),
       ),
-      child: _isLoading && onTap != null
-          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary))
-          : Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
     );
   }
 
@@ -331,19 +409,21 @@ class _HomeBuildTaskCardGridState extends State<HomeBuildTaskCardGrid> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      // margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      constraints: const BoxConstraints(
+        minHeight: 138,
+        maxHeight: 172,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFFB5B5B5).withOpacity(0.15),
-        borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 13), // 20
-        border: Border.all(
-          color:  AppColors.primary.withOpacity(0.25),
-          width: 1.5,
-        ),
+        color: const Color(0xFFFAF9FF).withOpacity(0.92),
+        borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 13),
+        border: Border.all(color: AppColors.primary.withOpacity(0.28), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.07),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),

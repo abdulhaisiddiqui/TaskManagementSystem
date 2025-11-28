@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:taskapp/core/utils/constants/app_constants.dart';
+import 'package:taskapp/views/screens/bottomnav/bottomnav_screen.dart';
 import 'package:taskapp/views/screens/loginsignup/login_screen.dart';
 
 import '../../../core/utils/widgets/reuseable_image_widget.dart';
@@ -19,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState(){
     super.initState();
     Timer(Duration(seconds: 3),(){
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BottomNavScreen()));
     });
 
   }
@@ -30,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ReuseableImageWidget(img: 'splash2.png'),
+            ReuseableImageWidget(img: 'splash2.png',width: double.infinity,),
             TextWidget(
               text: 'Manage your task, \nquickly.',
               txtStyle: TextStyle(

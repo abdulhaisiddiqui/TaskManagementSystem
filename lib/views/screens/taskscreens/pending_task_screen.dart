@@ -31,7 +31,7 @@ class _PendingTasksScreenState extends State<PendingTasksScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF5D5DA8)),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(

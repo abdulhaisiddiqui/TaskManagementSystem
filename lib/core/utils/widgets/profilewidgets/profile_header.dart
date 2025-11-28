@@ -40,7 +40,7 @@ class ProfileHeader extends StatelessWidget {
                 backgroundColor: AppColors.surfaceLight,
                 backgroundImage: user.photoURL != null && user.photoURL!.isNotEmpty
                   ? NetworkImage(user.photoURL!)
-                  : const AssetImage('assets/appImages/profile.png') as ImageProvider,
+                  : const AssetImage('assets/appImages/splashLogo.png') as ImageProvider,
               ),
             ),
 

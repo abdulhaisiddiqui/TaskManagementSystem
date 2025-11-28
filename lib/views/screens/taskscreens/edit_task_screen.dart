@@ -33,36 +33,65 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       isInitialized = true;
     }
   }
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.appBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
+        leading: Container(
+          margin: EdgeInsets.symmetric(horizontal: 18,vertical: 10),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF5D5DA8)),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
-        title: const Text("Edit Task", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
-
+        centerTitle: true,
+        title: const Text(
+          "Edit Task",
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF5D5DA8),
+          ),
+        ),
 
         actions: [
           Consumer<TaskViewModel>(
             builder: (context, vm, child) {
               return TextButton(
-                onPressed: vm.isLoading ? null : () async {
-                  final success = await vm.saveTask();
-                  if (success && context.mounted) {
-                    CustomSnackBar.success(message: "Task updated!", context: context);
+                onPressed: vm.isLoading
+                    ? null
+                    : () async {
+                        final success = await vm.saveTask();
+                        if (success && context.mounted) {
+                          CustomSnackBar.success(
+                            message: "Task updated!",
+                            context: context,
+                          );
 
-                    Navigator.pop(context);
-                  }
-                },
+                          Navigator.pop(context);
+                        }
+                      },
                 child: vm.isLoading
-                    ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : Text("Save", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF6C63FF))),
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        "Save",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF6C63FF),
+                        ),
+                      ),
               );
             },
           ),
@@ -87,7 +116,6 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                   ),
                   const SizedBox(height: 20),
 
-
                   CustomTextField(
                     label: "Description (Optional)",
                     initialValue: task.description ?? '',
@@ -97,20 +125,18 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                   ),
                   const SizedBox(height: 28),
 
-
                   Row(
                     children: [
                       Expanded(
                         child: DateTimeCard(
                           label: "Date (read-only)",
                           icon: Icons.calendar_today_rounded,
-                          value: DateFormat('dd MMM yyyy').format(task.startTime),
-                          onTap: (){},
+                          value: DateFormat(
+                            'dd MMM yyyy',
+                          ).format(task.startTime),
+                          onTap: () {},
                         ),
-
                       ),
-
-
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -127,17 +153,19 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                             initialTime: TimeOfDay.fromDateTime(task.startTime),
                           );
                           if (time != null) {
-                            vm.updateStartTime(DateTime(
-                              task.startTime.year,
-                              task.startTime.month,
-                              task.startTime.day,
-                              time.hour,
-                              time.minute,
-                            ));
+                            vm.updateStartTime(
+                              DateTime(
+                                task.startTime.year,
+                                task.startTime.month,
+                                task.startTime.day,
+                                time.hour,
+                                time.minute,
+                              ),
+                            );
                           }
                         },
                       ),
-                      SizedBox(height: 16,),
+                      SizedBox(height: 16),
                       DateTimeCard(
                         label: "End Time",
                         icon: Icons.access_time_filled_rounded,
@@ -148,13 +176,15 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                             initialTime: TimeOfDay.fromDateTime(task.endTime),
                           );
                           if (time != null) {
-                            vm.updateEndTime(DateTime(
-                              task.endTime.year,
-                              task.endTime.month,
-                              task.endTime.day,
-                              time.hour,
-                              time.minute,
-                            ));
+                            vm.updateEndTime(
+                              DateTime(
+                                task.endTime.year,
+                                task.endTime.month,
+                                task.endTime.day,
+                                time.hour,
+                                time.minute,
+                              ),
+                            );
                           }
                         },
                       ),
@@ -170,7 +200,8 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                           label: "Priority",
                           value: task.priority,
                           items: const ['High', 'Medium', 'Low'],
-                          onChanged: (val) => vm.updatePriority(val!), // ← val String? hai
+                          onChanged: (val) =>
+                              vm.updatePriority(val!), // ← val String? hai
                         ),
                       ),
                       const SizedBox(width: 16),

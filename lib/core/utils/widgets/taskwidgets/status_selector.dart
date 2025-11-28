@@ -1,102 +1,76 @@
 // core/utils/widgets/task/status_selector.dart
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../viewmodels/task_viewmodel.dart';
-import '../../../theme/app_color.dart';
-import '../../../theme/app_theme_constants.dart';
 
 class StatusSelector extends StatelessWidget {
   StatusSelector({super.key});
 
-  final Map<String, Color> statusColors = {
-    'To Do': AppColors.gray500.withOpacity(0.2),
-    'In Progress': AppColors.amber.withOpacity(0.25),
-    // 'Completed': AppColors.success.withOpacity(0.22),
-  };
-
-  final Map<String, Color> selectedColors = {
-    'To Do': AppColors.gray600.withOpacity(0.45),
-    'In Progress': AppColors.amber.withOpacity(0.45),
-    // 'Completed': AppColors.success,
-  };
-
-  final Map<String, IconData> statusIcons = {
-    'To Do': Icons.radio_button_unchecked_rounded,
-    'In Progress': Icons.sync_rounded,
-    // 'Completed': Icons.check_circle_rounded,
-  };
+  final List<Map<String, dynamic>> statuses = [
+    {
+      'label': 'To Do',
+      'icon': Icons.radio_button_unchecked_rounded,
+      'color': Colors.grey.shade600,
+      'bg': const Color(0xFFF5F5F5),
+    },
+    {
+      'label': 'In Progress',
+      'icon': Icons.sync_rounded,
+      'color': const Color(0xFFFF9800),
+      'bg': const Color(0xFFFFF3E0),
+    },
+    // {
+    //   'label': 'Completed',
+    //   'icon': Icons.check_circle_rounded,
+    //   'color': const Color(0xFF4CAF50),
+    //   'bg': const Color(0xFFE8F5E9),
+    // },
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Consumer<TaskViewModel>(
       builder: (context, vm, child) {
+        final current = vm.task.status;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Label
-            Text(
-              "Status",
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.88),
-              ),
-            ),
+            Text("Status", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Colors.grey.shade800)),
             const SizedBox(height: 14),
-
-
             Wrap(
               spacing: 14,
               runSpacing: 12,
-              children: ['To Do', 'In Progress'].map((status) {
-                final bool isSelected = vm.task.status == status;
+              children: statuses.map((s) {
+                final bool isSelected = current == s['label'];
+                final Color color = s['color'];
+                final Color bg = s['bg'];
 
                 return FilterChip(
-                  avatar: Icon(
-                    statusIcons[status],
-                    size: 20,
-                    color: isSelected ? AppColors.onPrimary : selectedColors[status],
-                  ),
-                  label: Text(
-                    status,
-                    style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                      fontSize: 14.5,
-                    ),
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(s['icon'], size: 21, color: isSelected ? Colors.white : color),
+                      const SizedBox(width: 8),
+                      Text(
+                        s['label'],
+                        style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.black87),
+                      ),
+                    ],
                   ),
                   selected: isSelected,
-                  onSelected: (_) => vm.updateStatus(status),
-
-                  // Background
-                  backgroundColor: statusColors[status],
-                  selectedColor: selectedColors[status],
-
-                  // Border & Shape
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
-                    side: BorderSide(
-                      color: isSelected
-                          ? selectedColors[status]!
-                          : AppColors.gray400.withOpacity(0.6),
-                      width: isSelected ? 3.0 : AppThemeConstants.borderWidth,
-                    ),
+                  onSelected: (_) => vm.updateStatus(s['label']),
+                  backgroundColor: bg,
+                  selectedColor: color,
+                  shape: StadiumBorder(
+                    side: BorderSide(color: isSelected ? color : color.withOpacity(0.3), width: isSelected ? 2.6 : 1.6),
                   ),
-
-                  // Text Color
-                  labelStyle: TextStyle(
-                    color: isSelected
-                        ? AppColors.onPrimary
-                        : Theme.of(context).colorScheme.onSurface,
-                  ),
-
-                  // Padding & Elevation
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-                  elevation: isSelected ? 10 : 2,
+                  elevation: isSelected ? 12 : 2,
                   pressElevation: 18,
-                  shadowColor: isSelected
-                      ? selectedColors[status]!.withOpacity(0.55)
-                      : Colors.transparent,
-
+                  shadowColor: color.withOpacity(isSelected ? 0.5 : 0.2),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                   showCheckmark: false,
                 );
               }).toList(),

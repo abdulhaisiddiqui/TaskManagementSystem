@@ -1,91 +1,66 @@
 // core/utils/widgets/task/category_selector.dart
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../viewmodels/task_viewmodel.dart';
 import '../../../theme/app_color.dart';
-import '../../../theme/app_theme_constants.dart';
 
 class CategorySelector extends StatelessWidget {
   CategorySelector({super.key});
 
-  final List<String> categories = ['Personal', 'Work', 'Study', 'Other'];
-
-
-  final Map<String, Color> categoryColors = {
-    'Personal': const Color(0xFFE8F5E9),
-    'Work': const Color(0xFFFFF3E0),
-    'Study': const Color(0xFFE3F2FD),
-    'Other': const Color(0xFFF3E5F5),
-  };
-
-  final Map<String, Color> categorySelectedColors = {
-    'Personal': AppColors.primary.withOpacity(0.45),
-    'Work': AppColors.amber.withOpacity(0.45),
-    'Study': AppColors.info.withOpacity(0.45),
-    'Other': AppColors.purple.withOpacity(0.45),
-  };
+  final List<Map<String, dynamic>> categories = [
+    {'label': 'Personal', 'icon': Icons.person_outline, 'bg': const Color(0xFFF3E5F5)}, // Soft Purple
+    {'label': 'Work', 'icon': Icons.work_outline, 'bg': const Color(0xFFE8EAF6)},     // Soft Indigo
+    {'label': 'Study', 'icon': Icons.school_outlined, 'bg': const Color(0xFFE0F2F1)},  // Soft Teal
+    {'label': 'Other', 'icon': Icons.category_outlined, 'bg': const Color(0xFFFFF3E0)}, // Soft Orange
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Consumer<TaskViewModel>(
       builder: (context, vm, child) {
+        final current = vm.task.category;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Label
-            Text(
-              "Category",
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Chips
+            Text("Category", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Colors.grey.shade800)),
+            const SizedBox(height: 14),
             Wrap(
               spacing: 12,
-              runSpacing: 10,
-              children: categories.map((category) {
-                final bool isSelected = vm.task.category == category;
+              runSpacing: 12,
+              children: categories.map((c) {
+                final bool isSelected = current == c['label'];
+                final Color bg = c['bg'];
 
                 return FilterChip(
+                  avatar: CircleAvatar(
+                    radius: 11,
+                    backgroundColor: isSelected ? AppColors.primary : bg,
+                    child: Icon(c['icon'], size: 15, color: isSelected ? Colors.white : AppColors.primary.withOpacity(0.7)),
+                  ),
                   label: Text(
-                    category,
+                    c['label'],
                     style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: isSelected
-                          ? AppColors.onPrimary
-                          : Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected ? AppColors.primary : Colors.black87,
                     ),
                   ),
                   selected: isSelected,
-                  onSelected: (_) => vm.updateCategory(category),
-
-                  // Background & Selected State
-                  backgroundColor: categoryColors[category],
-                  selectedColor: categorySelectedColors[category] ?? AppColors.primary,
-
-                  // Shape & Border
+                  onSelected: (_) => vm.updateCategory(c['label']),
+                  backgroundColor: bg,
+                  selectedColor: AppColors.primary.withOpacity(0.18),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
+                    borderRadius: BorderRadius.circular(30),
                     side: BorderSide(
-                      color: isSelected
-                          ? (categorySelectedColors[category] ?? AppColors.primary)
-                          : AppColors.gray400.withOpacity(0.5),
-                      width: isSelected ? 2.5 : AppThemeConstants.borderWidth,
+                      color: isSelected ? AppColors.primary : Colors.transparent,
+                      width: 2,
                     ),
                   ),
-
-                  // Padding & Elevation
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  elevation: isSelected ? 8 : 1,
+                  padding: const EdgeInsets.fromLTRB(6, 10, 14, 10),
                   showCheckmark: false,
-                  elevation: isSelected ? 6 : 1,
-                  pressElevation: 12,
-                  shadowColor: isSelected
-                      ? (categorySelectedColors[category] ?? AppColors.primary).withOpacity(0.4)
-                      : Colors.transparent,
                 );
               }).toList(),
             ),

@@ -16,6 +16,7 @@ import 'package:taskapp/views/screens/taskscreens/create_task_screen.dart';
 
 import '../../../core/theme/app_theme_constants.dart';
 import '../../../core/utils/widgets/homewidgets/task_filter_bar.dart';
+import '../editprofile/edit_profile_screen.dart';
 import '../taskscreens/pending_task_screen.dart';
 import '../taskscreens/task_detail_screen.dart';
 
@@ -61,16 +62,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 final String? photoUrl = profileVm.user?.photoURL;
 
                 return Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                  padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Colors.grey.shade200,
-                        child: ClipOval(
-                          child: photoUrl != null && photoUrl.isNotEmpty
-                              ? Image.network(photoUrl, width: 60, height: 60, fit: BoxFit.cover)
-                              : const Icon(Icons.person, size: 34),
+                      InkWell(
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen())),
+                        child: CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.grey.shade200,
+                          child: ClipOval(
+                            child: photoUrl != null && photoUrl.isNotEmpty
+                                ? Image.network(
+                                    photoUrl,
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                  )
+                                : const Icon(Icons.person, size: 34),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -80,26 +89,37 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Text(
                               'Hello, ${profileVm.user?.displayName ?? 'User'}',
-                              style:  TextStyle(fontSize: 20, fontWeight: FontWeight.bold,color: Colors.grey.shade800),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade800,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                             Text(
+                            Text(
                               'Welcome Back',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, fontFamily: 'Poppins',color: Colors.grey.shade700),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Poppins',
+                                color: Colors.grey.shade700,
+                              ),
                             ),
                           ],
                         ),
                       ),
 
-
-
-                      // Notification Icon
                       IconButton(
-                        icon: Icon(Icons.notifications_none_outlined,color: Colors.grey.shade700,),
-                        onPressed: () => Navigator.pushReplacement(
+                        icon: Icon(
+                          Icons.notifications_none_outlined,
+                          color: Colors.grey.shade700,
+                        ),
+                        onPressed: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const NotificationScreen(),
+                          ),
                         ),
                       ),
                     ],
@@ -108,16 +128,28 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
 
-
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              padding: const EdgeInsets.all(18),
+              margin: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+              padding: const EdgeInsets.all(16),
+              constraints: BoxConstraints(minHeight: 120, maxHeight: 145),
               decoration: BoxDecoration(
                 color: const Color(0xFF828282),
-                borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 13),
+                borderRadius: BorderRadius.circular(
+                  AppThemeConstants.borderRadius + 13,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
               child: StreamBuilder<DocumentSnapshot>(
-                stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userId)
+                    .snapshots(),
                 builder: (context, snapshot) {
                   double progress = 0.0;
                   String progressText = '0% completed';
@@ -128,70 +160,103 @@ class _HomeScreenState extends State<HomeScreen> {
                     final data = snapshot.data!.data() as Map<String, dynamic>;
                     final stats = data['stats'] as Map<String, dynamic>? ?? {};
                     final totalTasks = (stats['totalTasks'] ?? 0).toDouble();
-                    final completedTasks = (stats['completedTasks'] ?? 0).toDouble();
-                    pendingTasks = (stats['pendingTasks'] ?? 0) as int;
+                    final completedTasks = (stats['completedTasks'] ?? 0)
+                        .toDouble();
+                    pendingTasks = stats['pendingTasks'] ?? 0;
 
-                    progress = totalTasks > 0 ? completedTasks / totalTasks : 0.0;
-                    progressText = '${(progress * 100).toStringAsFixed(1)}% completed';
-                    pendingText = 'You have $pendingTasks more task${pendingTasks != 1 ? 's' : ''} to do!';
-                  } else if (snapshot.connectionState == ConnectionState.waiting) {
-                    pendingText = 'Loading tasks...';
+                    progress = totalTasks > 0
+                        ? completedTasks / totalTasks
+                        : 0.0;
+                    progressText =
+                        '${(progress * 100).toStringAsFixed(0)}%'; // ← .1 hata diya → chhota text
+                    pendingText =
+                        'You have $pendingTasks pending task${pendingTasks != 1 ? 's' : ''}';
+                  } else if (snapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    pendingText = 'Loading...';
                   } else {
-                    pendingText = 'You have 0 tasks to do!';
+                    pendingText = 'No tasks yet';
                   }
 
                   return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              progressText,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                            // Progress Text + Bar (ek line mein)
+                            Row(
+                              children: [
+                                Text(
+                                  progressText,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: LinearProgressIndicator(
+                                      value: progress,
+                                      minHeight: 7,
+                                      backgroundColor: Colors.white24,
+                                      valueColor: const AlwaysStoppedAnimation(
+                                        Color(0xFFD1D0F9),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 8),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                minHeight: 8,
-                                backgroundColor: Colors.white24,
-                                valueColor: const AlwaysStoppedAnimation(Color(0xFFD1D0F9)),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
+
+                            const SizedBox(height: 10),
+
+                            // Pending Text
                             Text(
                               pendingText,
                               style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
                                 color: Colors.white,
                               ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
 
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 10),
 
-                            ElevatedButton(
-                              onPressed: () {
-                                         Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const PendingTasksScreen()),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.grey.shade700,
-                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
-                              ),
-                              child:  Text(
-                                "Details",
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            // Details Button (Compact)
+                            SizedBox(
+                              height: 34,
+                              child: ElevatedButton(
+                                onPressed: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const PendingTasksScreen(),
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.grey.shade800,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: const Text(
+                                  "Details",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -200,10 +265,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       const SizedBox(width: 16),
 
-                      const ReuseableImageWidget(img: 'cardimg.png'),
+                      // Image (thoda chhota kiya)
+                      SizedBox(
+                        width: 90,
+                        height: 110,
+                        child: const ReuseableImageWidget(img: 'cardimg.png'),
+                      ),
                     ],
                   );
-
                 },
               ),
             ),
@@ -211,7 +280,10 @@ class _HomeScreenState extends State<HomeScreen> {
             Stack(
               children: [
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 15,
+                    vertical: 8,
+                  ),
                   padding: EdgeInsets.only(right: 40),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -245,7 +317,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   isSelected: vm.selectedTabIndex == 3,
                                   onTap: () => vm.selectTab(3),
                                 ),
-
                               ],
                             );
                           },
@@ -255,15 +326,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-
                 Positioned(
                   right: 15,
                   top: 0,
+
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    margin: EdgeInsets.symmetric(vertical: 5),
+                    padding: const EdgeInsets.all(0),
                     decoration: BoxDecoration(
                       color: AppColors.appBackgroundColor,
-
                     ),
                     child: Consumer<TaskViewModel>(
                       builder: (context, vm, child) {
@@ -271,15 +342,20 @@ class _HomeScreenState extends State<HomeScreen> {
                           onPressed: vm.toggleHomeViewMode,
                           icon: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 320),
-                            transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                            transitionBuilder: (child, animation) =>
+                                ScaleTransition(scale: animation, child: child),
                             child: Icon(
-                              vm.isGridViewHome ? Icons.view_list_rounded : Icons.grid_view_rounded,
+                              vm.isGridViewHome
+                                  ? Icons.view_list_rounded
+                                  : Icons.grid_view_rounded,
                               key: ValueKey<bool>(vm.isGridViewHome),
                               size: 28,
                               color: const Color(0xFF6C63FF),
                             ),
                           ),
-                          tooltip: vm.isGridViewHome ? "List View" : "Grid View",
+                          tooltip: vm.isGridViewHome
+                              ? "List View"
+                              : "Grid View",
                         );
                       },
                     ),
@@ -288,19 +364,19 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
 
-
             TaskFilterBar(
               selectedSort: context.watch<TaskViewModel>().currentSortBy,
-                onSortChanged: (sortBy) {
-
-                  if (context.read<TaskViewModel>().currentSortBy == sortBy) {
-                  } else {
-                    context.read<TaskViewModel>().setSortAndFilter(sortBy, 'All');
-                  }
-                },
+              onSortChanged: (sortBy) {
+                if (context.read<TaskViewModel>().currentSortBy == sortBy) {
+                } else {
+                  context.read<TaskViewModel>().setSortAndFilter(sortBy, 'All');
+                }
+              },
               onFilterApplied: (filterType, value) {
                 context.read<TaskViewModel>().setSortAndFilter(
-                  filterType == 'priority' ? TaskSortBy.priority : TaskSortBy.category,
+                  filterType == 'priority'
+                      ? TaskSortBy.priority
+                      : TaskSortBy.category,
                   value,
                 );
               },
@@ -318,13 +394,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.event_busy_rounded, size: 70, color: Colors.grey.shade400),
+                          Icon(
+                            Icons.event_busy_rounded,
+                            size: 70,
+                            color: Colors.grey.shade400,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             vm.selectedTabIndex == 0
                                 ? "No tasks yet"
                                 : "No ${['All', 'To Do', 'In Progress', 'Completed'][vm.selectedTabIndex]} tasks",
-                            style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey.shade600,
+                            ),
                           ),
                         ],
                       ),
@@ -333,13 +416,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   if (vm.isGridViewHome) {
                     return GridView.builder(
+                      physics: BouncingScrollPhysics(),
                       padding: const EdgeInsets.fromLTRB(15, 15, 15, 130),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 1.1,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 1.1,
+                          ),
                       itemCount: vm.filteredTasks2.length,
                       itemBuilder: (context, index) {
                         final task = vm.filteredTasks2[index];
@@ -348,7 +433,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => TaskDetailScreen(taskId: task.id!,),
+                                builder: (_) =>
+                                    TaskDetailScreen(taskId: task.id!),
                               ),
                             );
                           },
@@ -360,6 +446,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
+                    physics: BouncingScrollPhysics(),
                     itemCount: vm.filteredTasks2.length + 1,
                     itemBuilder: (context, index) {
                       if (index == vm.filteredTasks2.length) {
@@ -371,7 +458,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => TaskDetailScreen(taskId: task.id!,),
+                              builder: (_) =>
+                                  TaskDetailScreen(taskId: task.id!),
                             ),
                           );
                         },
@@ -389,33 +477,20 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 110, right: 5),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).colorScheme.primary,
-                Theme.of(context).colorScheme.primary.withOpacity(0.85),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            shape: BoxShape.circle,
-          ),
-          child: FloatingActionButton(
-            backgroundColor: Colors.transparent, // IMPORTANT
-            elevation: 0, // so gradient looks clean
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CreateTaskScreen()),
-              );
-            },
-            child: const Icon(Icons.add, color: Colors.white),
-          ),
+        padding: const EdgeInsets.only(bottom: 100),
+        child: FloatingActionButton(
+          backgroundColor: const Color(0xFF6C63FF),
+          elevation: 8,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CreateTaskScreen()),
+            );
+          },
+          child: const Icon(Icons.add, size: 32, color: Colors.white),
         ),
       ),
-
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

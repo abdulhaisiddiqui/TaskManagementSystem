@@ -1,115 +1,82 @@
 // core/utils/widgets/task/priority_selector.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../../../viewmodels/task_viewmodel.dart';
 import '../../../theme/app_color.dart';
-import '../../../theme/app_theme_constants.dart';
 
 class PrioritySelector extends StatelessWidget {
   PrioritySelector({super.key});
 
-  final Map<String, Color> priorityColors = {
-    'Low': AppColors.success.withOpacity(0.2),
-    'Medium': AppColors.amber.withOpacity(0.25),
-    'High': AppColors.error.withOpacity(0.18),
-  };
-
-  final Map<String, Color> selectedColors = {
-    'Low': AppColors.success.withOpacity(0.45),
-    'Medium': AppColors.amber.withOpacity(0.45),
-    'High': AppColors.error.withOpacity(0.45),
-  };
-
-  final Map<String, IconData> priorityIcons = {
-    'Low': Icons.arrow_downward_rounded,
-    'Medium': Icons.remove_rounded,
-    'High': Icons.arrow_upward_rounded,
-  };
+  final List<Map<String, dynamic>> priorities = [
+    {
+      'label': 'Low',
+      'icon': Icons.arrow_downward_rounded,
+      'color': const Color(0xFF4CAF50), // Green
+      'light': const Color(0xFFE8F5E9),
+    },
+    {
+      'label': 'Medium',
+      'icon': Icons.remove_rounded,
+      'color': const Color(0xFFFF9800), // Amber
+      'light': const Color(0xFFFFF3E0),
+    },
+    {
+      'label': 'High',
+      'icon': Icons.arrow_upward_rounded,
+      'color': const Color(0xFFE91E63), // Pinkish Red (better than harsh red)
+      'light': const Color(0xFFFCE4EC),
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Consumer<TaskViewModel>(
       builder: (context, vm, child) {
+        final current = vm.task.priority;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Label
-            Text(
-              "Priority level",
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.85),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-
+            Text("Priority level", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Colors.grey.shade800)),
+            const SizedBox(height: 14),
             Wrap(
               spacing: 12,
-              runSpacing: 10,
-              children: ['Low', 'Medium', 'High'].map((priority) {
-                final bool isSelected = vm.task.priority == priority;
+              runSpacing: 12,
+              children: priorities.map((p) {
+                final bool isSelected = current == p['label'];
+                final Color color = p['color'];
+                final Color light = p['light'];
 
                 return FilterChip(
                   label: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (isSelected)
-                        Icon(
-                          priorityIcons[priority],
-                          size: 18,
-                          color: AppColors.onPrimary,
-                        )
-                      else
-                        Icon(
-                          priorityIcons[priority],
-                          size: 18,
-                          color: selectedColors[priority],
-                        ),
-                      const SizedBox(width: 6),
+                      Icon(p['icon'], size: 19, color: isSelected ? Colors.white : color),
+                      const SizedBox(width: 8),
                       Text(
-                        priority,
+                        p['label'],
                         style: TextStyle(
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.white : Colors.black87,
                           fontSize: 14,
                         ),
                       ),
                     ],
                   ),
                   selected: isSelected,
-                  onSelected: (_) => vm.updatePriority(priority),
-
-                  // Background
-                  backgroundColor: priorityColors[priority],
-                  selectedColor: selectedColors[priority],
-
-
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius),
+                  onSelected: (_) => vm.updatePriority(p['label']),
+                  backgroundColor: light,
+                  selectedColor: color,
+                  shape: StadiumBorder(
                     side: BorderSide(
-                      color: isSelected
-                          ? selectedColors[priority]!
-                          : AppColors.gray400.withOpacity(0.6),
-                      width: isSelected ? 2.8 : AppThemeConstants.borderWidth,
+                      color: isSelected ? color : color.withOpacity(0.3),
+                      width: isSelected ? 2.6 : 1.6,
                     ),
                   ),
-
-
-                  labelStyle: TextStyle(
-                    color: isSelected
-                        ? AppColors.onPrimary
-                        : Theme.of(context).colorScheme.onSurface,
-                  ),
-
-
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  elevation: isSelected ? 8 : 2,
+                  elevation: isSelected ? 10 : 1.5,
                   pressElevation: 16,
-                  shadowColor: isSelected
-                      ? selectedColors[priority]!.withOpacity(0.5)
-                      : Colors.transparent,
-
+                  shadowColor: color.withOpacity(isSelected ? 0.4 : 0.15),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
                   showCheckmark: false,
                 );
               }).toList(),

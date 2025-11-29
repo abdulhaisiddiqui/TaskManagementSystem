@@ -36,6 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
@@ -189,6 +190,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: Icons.person_outline,
               title: "Account information",
               isLogout: false,
+              callback: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen()));
+              },
             ),
             BuildMenuItem(
               icon: Icons.logout,

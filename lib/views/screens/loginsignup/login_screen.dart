@@ -128,26 +128,44 @@ class _LoginScreenState extends State<LoginScreen> {
               hintText: 'Password',
             ),
             SizedBox(height: 33),
-            Consumer<AuthViewModel>(builder: (context,value,child){
-              return value.isLoading
-                  ? CircularProgressIndicator()
-                  : ReuseableButtons(
-                text: "Log in",
-                callback: () async {
-                  await value.login(
-                    email: emailController.text.trim(),
-                    password: passwordController.text.trim(),
-                    context: context,
-                  );
+            Consumer<AuthViewModel>(
+              builder: (context, authVm, child) {
+                return SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: authVm.isLoading
+                      ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          valueColor: const AlwaysStoppedAnimation(Colors.white),
+                          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Text(
+                        'Signing in...',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ) : ReuseableButtons(
+                    text: "Log in",
+                    callback: () async {
+                      await authVm.login(
+                        email: emailController.text.trim(),
+                        password: passwordController.text.trim(),
+                        context: context,
+                      );
+                    }
+                    )
+                );
+              }
 
-                  if (value.error != null) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(value.error!)));
-                  }
-                },
-              );
-            }),
+            ),
             SizedBox(height: 30),
 
             ReuseableTextButtons(

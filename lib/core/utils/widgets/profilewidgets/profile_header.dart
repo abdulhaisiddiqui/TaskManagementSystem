@@ -22,7 +22,6 @@ class ProfileHeader extends StatelessWidget {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
@@ -55,6 +54,7 @@ class ProfileHeader extends StatelessWidget {
                   Text(
                     user.displayName,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      letterSpacing: 2,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),

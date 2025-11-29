@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:taskapp/core/utils/constants/app_constants.dart';
 import 'package:taskapp/views/screens/bottomnav/bottomnav_screen.dart';
@@ -17,13 +18,26 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    Timer(Duration(seconds: 3),(){
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BottomNavScreen()));
-    });
+    Timer(const Duration(seconds: 3), () {
+      final user = FirebaseAuth.instance.currentUser;
 
+      if (user != null) {
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const BottomNavScreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
+    });
   }
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
@@ -31,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ReuseableImageWidget(img: 'splash2.png',width: double.infinity,),
+            ReuseableImageWidget(img: 'splash2.png', width: double.infinity),
             TextWidget(
               text: 'Manage your task, \nquickly.',
               txtStyle: TextStyle(

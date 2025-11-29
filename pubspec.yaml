@@ -34,6 +34,22 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  firebase_auth: ^6.1.2
+  firebase_core: ^4.2.1
+  cloud_firestore: ^6.1.0
+  provider: ^6.1.5+1
+  firebase_messaging:
+  flutter_local_notifications: ^19.5.0
+  intl: ^0.19.0
+  image_picker: ^1.2.1
+  firebase_storage: ^13.0.4
+  image: ^4.5.4
+  path_provider: ^2.1.3
+  timezone: ^0.10.1
+  permission_handler: ^11.3.1
+  lottie: ^3.1.2
+  google_sign_in: ^6.3.0
+  sqflite: ^2.4.2
 
 dev_dependencies:
   flutter_test:
@@ -58,8 +74,16 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/appImages/loginimg.png
+    - assets/appImages/login.png
+    - assets/appImages/splashlogo.png
+    - assets/appImages/profile.png
+    - assets/appImages/cardimg.png
+    - assets/appImages/Diary.png
+    - assets/appImages/splash2.png
+    - assets/appImages/google-logo.png
+    - assets/badges/first-step.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -73,12 +97,12 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  fonts:
+    - family: Poppins
+      fonts:
+         - asset: assets/fonts/Poppins-ExtraBold.ttf
+         - asset: assets/fonts/Poppins-Regular.ttf
+         - asset: assets/fonts/Poppins-SemiBold.ttf
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

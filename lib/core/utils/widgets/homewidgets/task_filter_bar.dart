@@ -139,7 +139,7 @@ class _TaskFilterBarState extends State<TaskFilterBar> {
         child: AnimatedContainer(
           key: isSelected ? _selectedKey : null,
           duration: const Duration(milliseconds: 300),
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 7),
           decoration: BoxDecoration(
             color: isSelected ? const Color(0xFF6C63FF) : Colors.transparent,
             borderRadius: BorderRadius.circular(AppThemeConstants.borderRadius + 8),

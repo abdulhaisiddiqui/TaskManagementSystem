@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:taskapp/views/screens/loginsignup/signup_screen.dart';
 import 'dart:typed_data';
 import '../core/utils/widgets/custom_snackbar.dart';
 import '../data/repositories/notificationrepository/notification_repository.dart';
@@ -43,7 +44,7 @@ class AuthViewModel extends ChangeNotifier {
   UserModel? get user => _user;
 
   Future<void> signUp(String email, String password, String displayName,BuildContext context) async {
-    _isLoading = true;
+    isLoading = true;
     _error = null;
 
 
@@ -69,10 +70,14 @@ class AuthViewModel extends ChangeNotifier {
     } on FirebaseAuthException catch (e) {
       final errorMessage = FirebaseErrorMapper().handleAuthError(e.code);
       CustomSnackBar.error(message: errorMessage, context: context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => SignupScreen()),
+      );
     } catch (e) {
       CustomSnackBar.error(message: "Something went wrong: $e", context: context);
     } finally {
-      _isLoading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
@@ -82,7 +87,7 @@ class AuthViewModel extends ChangeNotifier {
     required String password,
     required BuildContext context,
   }) async {
-    isLoading = true;  // Direct setter use karo, setter trigger karega notifyListeners
+    isLoading = true;
     _error = null;
 
     try {
@@ -131,7 +136,7 @@ class AuthViewModel extends ChangeNotifier {
 
         CustomSnackBar.success(message: "Login successful!", context: context);
 
-        // Navigation ke PEHLE loading false mat karo
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => BottomNavScreen()),

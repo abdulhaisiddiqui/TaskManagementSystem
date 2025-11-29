@@ -22,7 +22,6 @@ final TextEditingController passwordController = TextEditingController();
 class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
-    final authVM = Provider.of<AuthViewModel>(context, listen: false);
     return Scaffold(
       body: Center(
         child: Column(
@@ -54,7 +53,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 30,),
+            SizedBox(height: 30),
             SizedBox(height: 30),
             ReuseableFields(
               controller: usernameController,
@@ -69,23 +68,55 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             SizedBox(height: 30),
 
-            authVM.isLoading
-                ? CircularProgressIndicator()
-                : ReuseableButtons(
-              text: "Register",
-              callback: () async {
-                await authVM.signUp(
-                  emailController.text.trim(),
-                  passwordController.text.trim(),
-                  usernameController.text.trim(),
-                  context,
+            Consumer<AuthViewModel>(
+              builder: (context, authVm, child) {
+                return SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: authVm.isLoading
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                valueColor: const AlwaysStoppedAnimation(
+                                  Colors.white,
+                                ),
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withOpacity(0.3),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            const Text(
+                              'Signing up...',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        )
+                      : ReuseableButtons(
+                          text: "Register",
+                          callback: () async {
+                            await authVm.signUp(
+                              emailController.text.trim(),
+                              passwordController.text.trim(),
+                              usernameController.text.trim(),
+                              context,
+                            );
+                            if (authVm.error != null) {
+                              ScaffoldMessenger.of(
+                                context,
+                              ).showSnackBar(SnackBar(content: Text(authVm.error!)));
+                            }
+                          },
+                        ),
                 );
-
-                if (authVM.error != null) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(authVM.error!)));
-                }
               },
             ),
             SizedBox(height: 30),

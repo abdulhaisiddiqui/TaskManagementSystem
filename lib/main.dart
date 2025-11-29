@@ -95,15 +95,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(fontFamily: 'Poppins'),
-      home: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return const SplashScreen();
-          }
-          return const LoginScreen();
-        },
-      ),
+      home: SplashScreen()
+
+
+
     );
   }
 }

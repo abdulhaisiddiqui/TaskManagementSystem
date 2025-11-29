@@ -20,13 +20,13 @@ class StreakCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text("$currentStreak", style: TextStyle(fontSize: 54, color: Colors.white)),
+          Text("$currentStreak", style: TextStyle(fontSize: 44, color: Colors.white)),
           SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("DAY STREAK", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white)),
-              Text("Best: $longestStreak days", style: TextStyle(color: Colors.white70,fontSize: 15)),
+              Text("DAY STREAK", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text("Best: $longestStreak days", style: TextStyle(color: Colors.white70,fontSize: 12)),
             ],
           ),
           Spacer(),
